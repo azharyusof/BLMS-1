@@ -47,7 +47,7 @@ namespace BLMS.Controllers
             return View();
         }
 
-        // POST: BusinessDivController/Create
+        // POST: AuthorityDivController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind] Authority authority)
@@ -114,7 +114,7 @@ namespace BLMS.Controllers
             return View(authority);
         }
 
-        // POST: BusinessDivController/Edit/5
+        // POST: AuthorityDivController/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, [Bind] Authority authority)
@@ -176,6 +176,7 @@ namespace BLMS.Controllers
         #endregion
 
         #region DELETE
+        // POST: AuthorityDivController/Delete
         public JsonResult Delete(int Id)
         {
 
