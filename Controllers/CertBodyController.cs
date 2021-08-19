@@ -49,7 +49,7 @@ namespace BLMS.Controllers
             return View();
         }
 
-        // POST: BusinessDivController/Create
+        // POST: CertBodyDivController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind] CertBody certBody)
@@ -105,7 +105,7 @@ namespace BLMS.Controllers
             return View(certBody);
         }
 
-        // POST: BusinessDivController/Edit/5
+        // POST: CertBodyDivController/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, [Bind] CertBody certBody)
@@ -151,6 +151,7 @@ namespace BLMS.Controllers
         #endregion
 
         #region DELETE
+        // POST: CertBodyDivController/Delete
         [Authorize(Roles.ADMINISTRATOR)]
         [Authorize(AccessLevel.ADMINISTRATION)]
         public JsonResult Delete(int Id)
