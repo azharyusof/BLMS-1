@@ -1,11 +1,11 @@
 ﻿@model BLMS.Models.License.LicenseHQ
 
 @{
-    ViewData["Title"] = "View HQ License (Request)";
+    ViewData["Title"] = "View HQ License";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="mt-md-4 pt-md-2 mb-5 pb-5">
+<section class="mt-md-4 pt-md-2 mb-5 pb-5" style="font-size: 12px;">
     <!-- Grid row -->
     <div class="row">
 
@@ -17,7 +17,7 @@
                     <i class="fas fa fa-building info-color py-4 mr-3 z-depth-2"></i>
                     <div class="data">
                         <h5 class="font-weight-bold dark-grey-text">
-                            View HQ License (Request)
+                            View HQ License
                         </h5>
                     </div>
                 </div>
@@ -27,12 +27,83 @@
                     <!-- Grid row -->
                     <div class="row">
                         <div class="col-lg-12">
+                            @if (Model.isRequested == true)
+                            {
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <label class="control-label text-sm font-weight-bold">License has been requested</label>
+                                    </div>
+                                </div>
+                            }
+                            else if (Model.isApproved == true)
+                            {
+                                <div class="card">
+                                    <div class="card-header bg-info text-white">
+                                        <strong><i class="far fa fa-check-circle ml-1 text-black"></i> This license has been approved!</strong>
+                                    </div>
+                                </div>
+                            }
+                            else if (Model.isRejected == true)
+                            {
+                                <div class="card">
+                                    <div class="card-header bg-danger text-white">
+                                        <strong><i class="far fa fa-window-close ml-1 text-black"></i> This license has been rejected!</strong>
+                                        <br />
+                                        <strong>Reason: </strong><span>@Html.DisplayFor(modelItem => Model.RejectionRemarks)</span>
+                                    </div>
+                                </div>
+                            }
+
+                            <ul class="stepper stepper-horizontal">
+                                <li class="completed active">
+                                    <a href="#!">
+                                        <span class="circle"><i class="fas fa-check mt-0"></i></span>
+                                        <span class="label">Requested</span>
+                                    </a>
+                                </li>
+
+                                @if (Model.isApproved == true)
+                                {
+                                    <li class="completed">
+                                        <a href="#!">
+                                            <span class="circle"><i class="fas fa-check mt-0"></i></span>
+                                            <span class="label">Approved</span>
+                                        </a>
+                                    </li>
+                                }
+                                else if (Model.isRejected == true)
+                                {
+                                    <li class="warning">
+                                        <a href="#!">
+                                            <span class="circle"><i class="fas fa-exclamation mt-0"></i></span>
+                                            <span class="font-weight-bold text-black">Rejected</span>
+                                        </a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li>
+                                        <a href="#!">
+                                            <span class="circle">2</span>
+                                            <span class="label">Approved</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                <li>
+                                    <a href="#!">
+                                        <span class="circle">3</span>
+                                        <span class="label">Registered</span>
+                                    </a>
+                                </li>
+                            </ul>
+
                             <form asp-action="Create" autocomplete="off" method="post" enctype="multipart/form-data">
                                 <div class="list-group list-group-flush">
                                     <div class="container">
-                                        <h5 class="font-weight-bold dark-grey-text">
+                                        <span class="font-weight-bold dark-grey-text">
                                             <i class="fas fa fa-clipboard-list"> License Details</i>
-                                        </h5>
+                                        </span>
 
                                         <div class="list-group-item col-md-12">
                                             <div class="row">
@@ -44,7 +115,7 @@
                                                     </div>
 
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="LicenseName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" onkeydown="return false">
+                                                        <input asp-for="LicenseName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" onkeydown="return false" style="font-size: 12px;">
                                                         <label asp-for="LicenseName" class="control-label"><span style="color:red;">*</span> License Name</label>
                                                         <span asp-validation-for="LicenseName" class="text-danger text-sm"></span>
                                                     </div>
@@ -54,7 +125,7 @@
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="CategoryName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" onkeydown="return false">
+                                                        <input asp-for="CategoryName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" onkeydown="return false" style="font-size: 12px;">
                                                         <label asp-for="CategoryName" class="control-label"><span style="color:red;">*</span> License Type</label>
                                                         <span asp-validation-for="CategoryName" class="text-danger text-sm"></span>
                                                     </div>
@@ -64,7 +135,7 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="DivName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" onkeydown="return false">
+                                                        <input asp-for="DivName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" onkeydown="return false" style="font-size: 12px;">
                                                         <label asp-for="DivName" class="control-label"><span style="color:red;">*</span> Business Division</label>
                                                         <span asp-validation-for="DivName" class="text-danger text-sm"></span>
                                                     </div>
@@ -72,7 +143,7 @@
 
                                                 <div class="col-md-6">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="UnitName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" onkeydown="return false">
+                                                        <input asp-for="UnitName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" onkeydown="return false" style="font-size: 12px;">
                                                         <label asp-for="UnitName" class="control-label"><span style="color:red;">*</span> Business Unit</label>
                                                         <span asp-validation-for="UnitName" class="text-danger text-sm"></span>
                                                     </div>
@@ -86,15 +157,15 @@
 
                                 <div class="list-group list-group-flush">
                                     <div class="container">
-                                        <h5 class="font-weight-bold dark-grey-text">
+                                        <span class="font-weight-bold dark-grey-text">
                                             <i class="fas fa fa-users"> Person in Charge</i>
-                                        </h5>
+                                        </span>
 
                                         <div class="list-group-item col-md-12">
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="PIC1Name" class="form-control" onkeydown="return false">
+                                                        <input asp-for="PIC1Name" class="form-control" onkeydown="return false" style="font-size: 12px;">
                                                         <label asp-for="PIC1Name" class="control-label"><span style="color:red;">*</span> PIC 1 Name</label>
                                                         <span asp-validation-for="PIC1Name" class="text-danger text-sm"></span>
                                                     </div>
@@ -102,7 +173,7 @@
 
                                                 <div class="col-md-4">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="PIC2Name" class="form-control" onkeydown="return false">
+                                                        <input asp-for="PIC2Name" class="form-control" onkeydown="return false" style="font-size: 12px;">
                                                         <label asp-for="PIC2Name" class="control-label"><span style="color:red;">*</span> PIC 2 Name</label>
                                                         <span asp-validation-for="PIC2Name" class="text-danger text-sm"></span>
                                                     </div>
@@ -110,7 +181,7 @@
 
                                                 <div class="col-md-4">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="PIC3Name" class="form-control" onkeydown="return false">
+                                                        <input asp-for="PIC3Name" class="form-control" onkeydown="return false" style="font-size: 12px;">
                                                         <label asp-for="PIC3Name" class="control-label"><span style="color:red;">*</span> PIC 1 Name</label>
                                                         <span asp-validation-for="PIC3Name" class="text-danger text-sm"></span>
                                                     </div>
@@ -124,15 +195,15 @@
 
                                 <div class="list-group list-group-flush">
                                     <div class="container">
-                                        <h5 class="font-weight-bold dark-grey-text">
+                                        <span class="font-weight-bold dark-grey-text">
                                             <i class="fas fa fa-info-circle"> Remarks</i>
-                                        </h5>
+                                        </span>
 
                                         <div class="list-group-item col-md-12">
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="md-form form-sm mb-0">
-                                                        <textarea asp-for="Remarks" rows="5" onkeyup="this.value=this.value.toUpperCase()" class="md-textarea form-control" onkeydown="return false"></textarea>
+                                                        <textarea asp-for="Remarks" rows="5" onkeyup="this.value=this.value.toUpperCase()" class="md-textarea form-control" onkeydown="return false" style="font-size: 12px;"></textarea>
                                                         <label asp-for="Remarks" class="control-label">Remarks</label>
                                                         <span asp-validation-for="Remarks" class="text-danger text-sm"></span>
                                                     </div>
@@ -147,7 +218,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <a asp-action="Index" class="btn btn-outline-success waves-effect">Back</a>
+                                            <a asp-action="Index" class="btn btn-outline-success waves-effect" style="font-size: 12px;">Back</a>
                                         </div>
                                     </div>
                                 </div>

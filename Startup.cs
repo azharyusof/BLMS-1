@@ -1,3 +1,4 @@
+using BLMS.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace BLMS
 {
@@ -27,6 +29,9 @@ namespace BLMS
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<CompetentDBContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("DevServerConnection")));
+
             services.AddControllersWithViews();
 
             //Secret key to Encrypt and Decrypt the Token

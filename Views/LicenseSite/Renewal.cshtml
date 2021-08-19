@@ -5,7 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="mt-md-4 pt-md-2 mb-5 pb-5">
+<section class="mt-md-4 pt-md-2 mb-5 pb-5" style="font-size:12px;">
     <!-- Grid row -->
     <div class="row">
 
@@ -54,7 +54,7 @@
                                                     </div>
 
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="LicenseName" onkeyup="this.value=this.value.toUpperCase()" class="form-control" placeholder="Type New License Name" onkeydown="return false;">
+                                                        <input asp-for="LicenseName" class="form-control" placeholder="Type New License Name" onkeydown="return false;" style="font-size:12px;">
                                                         <label asp-for="LicenseName" class="control-label"><span style="color:red;">*</span> License Name</label>
                                                         <span asp-validation-for="LicenseName" class="text-danger text-sm"></span>
                                                     </div>
@@ -64,7 +64,7 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="RenewalRegistrationNo" class="form-control" placeholder="Type New Registration No">
+                                                        <input asp-for="RenewalRegistrationNo" class="form-control" placeholder="Type New Registration No" style="font-size:12px;">
                                                         <label asp-for="RenewalRegistrationNo" class="control-label"><span style="color:red;">*</span> Registration No (Renewal)</label>
                                                         <span asp-validation-for="RenewalRegistrationNo" class="text-danger text-sm"></span>
                                                     </div>
@@ -72,7 +72,7 @@
 
                                                 <div class="col-md-6">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="RenewalSerialNo" class="form-control" placeholder="Type New Serial No">
+                                                        <input asp-for="RenewalSerialNo" class="form-control" placeholder="Type New Serial No" style="font-size:12px;">
                                                         <label asp-for="RenewalSerialNo" class="control-label">Serial No (Renewal)</label>
                                                         <span asp-validation-for="RenewalSerialNo" class="text-danger text-sm"></span>
                                                     </div>
@@ -82,7 +82,7 @@
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="md-form form-sm mb-0">
-                                                        <input asp-for="CategoryName" class="form-control" placeholder="Type New License Type" onkeydown="return false;">
+                                                        <input asp-for="CategoryName" class="form-control" placeholder="Type New License Type" onkeydown="return false;" style="font-size:12px;">
                                                         <label asp-for="CategoryName" class="control-label">License Type</label>
                                                         <span asp-validation-for="CategoryName" class="text-danger text-sm"></span>
                                                     </div>

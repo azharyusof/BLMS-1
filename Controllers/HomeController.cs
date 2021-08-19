@@ -77,6 +77,7 @@ namespace BLMS.Controllers
                 //Save token in session object
                 HttpContext.Session.SetString("JWToken", userToken);
             }
+
             return Redirect("~/Dashboard/Index");
         }
 

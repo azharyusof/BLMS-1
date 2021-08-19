@@ -1,4 +1,5 @@
 ﻿using BLMS.Models.License;
+using BLMS.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,6 +18,8 @@ namespace BLMS.Context
         #region GRIDVIEW
         public IEnumerable<LicenseSite> LicenseSiteGetAll()
         {
+            var counter = 1;
+
             var licenseSiteList = new List<LicenseSite>();
 
             using (SqlConnection conn = new SqlConnection(connectionstring))
@@ -29,6 +32,8 @@ namespace BLMS.Context
                 while (dr.Read())
                 {
                     var licenseSite = new LicenseSite();
+
+                    licenseSite.IndexNo = counter;
 
                     licenseSite.LicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
                     licenseSite.LicenseName = dr["LicenseName"].ToString();
@@ -47,6 +52,8 @@ namespace BLMS.Context
                     licenseSite.hasFile = Convert.ToBoolean(dr["hasFile"].ToString());
 
                     licenseSiteList.Add(licenseSite);
+
+                    counter++;
                 }
 
                 conn.Close();
@@ -80,9 +87,6 @@ namespace BLMS.Context
 
                 //License File
                 cmd.Parameters.AddWithValue("LicenseFileName", licenseSite.LicenseFileName);
-                cmd.Parameters.AddWithValue("FileType", licenseSite.FileType);
-                cmd.Parameters.AddWithValue("Extension", licenseSite.Extension);
-                cmd.Parameters.AddWithValue("Data", licenseSite.Data);
 
                 cmd.Parameters.AddWithValue("UserName", UserName);
 
@@ -116,9 +120,6 @@ namespace BLMS.Context
 
                 //License File
                 cmd.Parameters.AddWithValue("LicenseFileName", licenseSite.LicenseFileName);
-                cmd.Parameters.AddWithValue("FileType", licenseSite.FileType);
-                cmd.Parameters.AddWithValue("Extension", licenseSite.Extension);
-                cmd.Parameters.AddWithValue("Data", licenseSite.Data);
 
                 cmd.Parameters.AddWithValue("UserName", UserName);
 
@@ -146,6 +147,7 @@ namespace BLMS.Context
 
                 while (dr.Read())
                 {
+                    licenseSite.LicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
                     licenseSite.LicenseName = dr["LicenseName"].ToString();
                     licenseSite.CategoryID = Convert.ToInt32(dr["CategoryID"].ToString());
                     licenseSite.CategoryName = dr["CategoryName"].ToString();
@@ -171,9 +173,6 @@ namespace BLMS.Context
                     licenseSite.isRenewed = Convert.ToBoolean(dr["isRenewed"].ToString());
 
                     licenseSite.LicenseFileName = dr["LicenseFileName"].ToString();
-                    licenseSite.FileType = dr["FileType"].ToString();
-                    licenseSite.Extension = dr["Extension"].ToString();
-                    licenseSite.Data = (byte[])dr["Data"];
 
                     licenseSite.RenewReminderDT = Convert.ToDateTime(dr["RenewReminderDT"].ToString());
 
@@ -223,6 +222,8 @@ namespace BLMS.Context
 
             using (SqlConnection conn = new SqlConnection(connectionstring))
             {
+                var counter = 1;
+
                 conn.Open();
                 SqlCommand cmd = new SqlCommand("spLicenseHQGetAll", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -231,6 +232,8 @@ namespace BLMS.Context
                 while (dr.Read())
                 {
                     var licenseHQ = new LicenseHQ();
+
+                    licenseHQ.indexNo = counter;
 
                     licenseHQ.LicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
                     licenseHQ.LicenseName = dr["LicenseName"].ToString();
@@ -243,6 +246,7 @@ namespace BLMS.Context
                     licenseHQ.PIC3Name = dr["PIC3Name"].ToString();
                     licenseHQ.isRequested = Convert.ToBoolean(dr["isRequested"].ToString());
                     licenseHQ.isApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseHQ.isRejected = Convert.ToBoolean(dr["isRejected"].ToString());
                     licenseHQ.isRegistered = Convert.ToBoolean(dr["isRegistered"].ToString());
                     licenseHQ.isRenewed = Convert.ToBoolean(dr["isRenewed"].ToString());
 
@@ -251,6 +255,8 @@ namespace BLMS.Context
                     licenseHQ.hasFile = Convert.ToBoolean(dr["hasFile"].ToString());
 
                     licenseHQList.Add(licenseHQ);
+
+                    counter++;
                 }
 
                 conn.Close();
@@ -316,6 +322,9 @@ namespace BLMS.Context
                     licenseHQ.RegistrationNo = dr["RegistrationNo"].ToString();
                     licenseHQ.SerialNo = dr["SerialNo"].ToString();
 
+                    licenseHQ.IssuedDT = dr["IssuedDT"].ToString();
+                    licenseHQ.ExpiredDT = dr["ExpiredDT"].ToString();
+
                     licenseHQ.PIC1StaffNo = dr["PIC1StaffNo"].ToString();
                     licenseHQ.PIC1Name = dr["PIC1Name"].ToString();
                     licenseHQ.PIC1Email = dr["PIC1Email"].ToString();
@@ -330,21 +339,74 @@ namespace BLMS.Context
 
                     licenseHQ.isRequested = Convert.ToBoolean(dr["isRequested"].ToString());
                     licenseHQ.isApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseHQ.isRejected = Convert.ToBoolean(dr["isRejected"].ToString());
                     licenseHQ.isRegistered = Convert.ToBoolean(dr["isRegistered"].ToString());
                     licenseHQ.isRenewed = Convert.ToBoolean(dr["isRenewed"].ToString());
 
                     licenseHQ.LicenseFileName = dr["LicenseFileName"].ToString();
-                    licenseHQ.FileType = dr["FileType"].ToString();
-                    licenseHQ.Extension = dr["Extension"].ToString();
-                    licenseHQ.Data = (byte[])dr["Data"];
 
                     licenseHQ.RenewReminderDT = Convert.ToDateTime(dr["RenewReminderDT"].ToString());
+
+                    licenseHQ.RejectionRemarks = dr["RejectRemarks"].ToString();
                 }
 
                 conn.Close();
             }
 
             return licenseHQ;
+        }
+        #endregion
+
+        #region HISTORY GRIDVIEW
+        public IEnumerable<LicenseHQ> LicenseHQGetLog(string LicenseName)
+        {
+            var counter = 1;
+
+            var licenseHQList = new List<LicenseHQ>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseHQGetLog", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("LicenseName", LicenseName);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var licenseHQ = new LicenseHQ();
+
+                    licenseHQ.indexNo = counter;
+
+                    licenseHQ.HistoryLicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
+                    licenseHQ.HistoryLicenseName = dr["LicenseName"].ToString();
+                    licenseHQ.HistoryRegistrationNo = dr["RegistrationNo"].ToString();
+                    licenseHQ.HistorySerialNo = dr["SerialNo"].ToString();
+                    licenseHQ.HistoryIssuedDT = dr["IssuedDT"].ToString();
+                    licenseHQ.HistoryExpiredDT = dr["ExpiredDT"].ToString();
+                    licenseHQ.HistoryPIC1Name = dr["PIC1Name"].ToString();
+                    licenseHQ.HistoryPIC2Name = dr["PIC2Name"].ToString();
+                    licenseHQ.HistoryPIC3Name = dr["PIC3Name"].ToString();
+                    licenseHQ.HistoryisRequested = Convert.ToBoolean(dr["isRequested"].ToString());
+                    licenseHQ.HistoryisApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseHQ.HistoryisRejected = Convert.ToBoolean(dr["isRejected"].ToString());
+                    licenseHQ.HistoryisRegistered = Convert.ToBoolean(dr["isRegistered"].ToString());
+                    licenseHQ.HistoryisRenewed = Convert.ToBoolean(dr["isRenewed"].ToString());
+
+                    licenseHQ.HistoryRenewReminderDT = Convert.ToDateTime(dr["RenewReminderDT"].ToString());
+
+                    licenseHQ.HistoryhasFile = Convert.ToBoolean(dr["hasFile"].ToString());
+
+                    licenseHQList.Add(licenseHQ);
+
+                    counter++;
+                }
+
+                conn.Close();
+            }
+
+            return licenseHQList;
         }
         #endregion
 
@@ -381,6 +443,8 @@ namespace BLMS.Context
         #region GRIDVIEW
         public IEnumerable<LicenseAdmin> LicenseAdminGetAll()
         {
+            var counter = 1;
+
             var licenseAdminList = new List<LicenseAdmin>();
 
             using (SqlConnection conn = new SqlConnection(connectionstring))
@@ -394,6 +458,8 @@ namespace BLMS.Context
                 {
                     var licenseAdmin = new LicenseAdmin();
 
+                    licenseAdmin.IndexNo = counter;
+
                     licenseAdmin.LicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
                     licenseAdmin.LicenseName = dr["LicenseName"].ToString();
                     licenseAdmin.CategoryName = dr["CategoryName"].ToString();
@@ -405,6 +471,7 @@ namespace BLMS.Context
                     licenseAdmin.PIC3Name = dr["PIC3Name"].ToString();
                     licenseAdmin.isRequested = Convert.ToBoolean(dr["isRequested"].ToString());
                     licenseAdmin.isApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseAdmin.isRejected = Convert.ToBoolean(dr["isRejected"].ToString());
                     licenseAdmin.isRegistered = Convert.ToBoolean(dr["isRegistered"].ToString());
                     licenseAdmin.isRenewed = Convert.ToBoolean(dr["isRenewed"].ToString());
 
@@ -415,12 +482,426 @@ namespace BLMS.Context
                     licenseAdmin.UserType = dr["UserType"].ToString();
 
                     licenseAdminList.Add(licenseAdmin);
+
+                    counter++;
                 }
 
                 conn.Close();
             }
 
             return licenseAdminList;
+        }
+        #endregion
+
+        #region EDIT LICENSE HQ (REQUEST/APPROVE)
+        //License Request
+        public void EditLicenseHQRequest(LicenseAdmin LicenseAdmin, string UserName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseHQReqEdit", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseID", LicenseAdmin.LicenseID);
+                cmd.Parameters.AddWithValue("CategoryID", LicenseAdmin.CategoryID);
+                cmd.Parameters.AddWithValue("DivID", LicenseAdmin.DivID);
+                cmd.Parameters.AddWithValue("UnitID", LicenseAdmin.UnitID);
+                cmd.Parameters.AddWithValue("LicenseName", LicenseAdmin.LicenseName);
+                cmd.Parameters.AddWithValue("PIC1Name", LicenseAdmin.PIC1Name);
+                cmd.Parameters.AddWithValue("PIC2StaffNo", LicenseAdmin.PIC2StaffNo);
+                cmd.Parameters.AddWithValue("PIC3StaffNo", LicenseAdmin.PIC3StaffNo);
+                cmd.Parameters.AddWithValue("Remarks", LicenseAdmin.Remarks);
+
+                cmd.Parameters.AddWithValue("UserName", UserName);
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+        #endregion
+
+        #region EDIT LICENSE HQ (REGISTER/RENEW)
+        //License Request
+        public void EditLicenseHQRegister(LicenseAdmin LicenseAdmin, string UserName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseHQRegEdit", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseID", LicenseAdmin.LicenseID);
+                cmd.Parameters.AddWithValue("CategoryID", LicenseAdmin.CategoryID);
+                cmd.Parameters.AddWithValue("DivID", LicenseAdmin.DivID);
+                cmd.Parameters.AddWithValue("UnitID", LicenseAdmin.UnitID);
+                cmd.Parameters.AddWithValue("LicenseName", LicenseAdmin.LicenseName);
+                cmd.Parameters.AddWithValue("PIC1Name", LicenseAdmin.PIC1Name);
+                cmd.Parameters.AddWithValue("PIC2StaffNo", LicenseAdmin.PIC2StaffNo);
+                cmd.Parameters.AddWithValue("PIC3StaffNo", LicenseAdmin.PIC3StaffNo);
+                cmd.Parameters.AddWithValue("Remarks", LicenseAdmin.Remarks);
+
+                cmd.Parameters.AddWithValue("UserName", UserName);
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+        #endregion
+
+        #region GET LICENSE BY ID
+        //Get License HQ By ID
+        public LicenseAdmin GetLicenseAdminByID(int? id)
+        {
+            var licenseAdmin = new LicenseAdmin();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseAdminGetById", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseID", id);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    licenseAdmin.LicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
+                    licenseAdmin.OldLicenseName = dr["LicenseName"].ToString();
+
+                    licenseAdmin.LicenseName = dr["LicenseName"].ToString();
+                    licenseAdmin.CategoryID = Convert.ToInt32(dr["CategoryID"].ToString());
+                    licenseAdmin.CategoryName = dr["CategoryName"].ToString();
+                    licenseAdmin.DivID = Convert.ToInt32(dr["DivID"].ToString());
+                    licenseAdmin.DivName = dr["DivName"].ToString();
+                    licenseAdmin.UnitID = Convert.ToInt32(dr["UnitID"].ToString());
+                    licenseAdmin.UnitName = dr["UnitName"].ToString();
+
+                    licenseAdmin.RegistrationNo = dr["RegistrationNo"].ToString();
+                    licenseAdmin.SerialNo = dr["SerialNo"].ToString();
+
+                    licenseAdmin.IssuedDT = dr["IssuedDT"].ToString();
+                    licenseAdmin.ExpiredDT = dr["ExpiredDT"].ToString();
+
+                    licenseAdmin.PIC1StaffNo = dr["PIC1StaffNo"].ToString();
+                    licenseAdmin.PIC1Name = dr["PIC1Name"].ToString();
+                    licenseAdmin.PIC1Email = dr["PIC1Email"].ToString();
+                    licenseAdmin.PIC2StaffNo = dr["PIC2StaffNo"].ToString();
+                    licenseAdmin.PIC2Name = dr["PIC2Name"].ToString();
+                    licenseAdmin.PIC2Email = dr["PIC2Email"].ToString();
+                    licenseAdmin.PIC3StaffNo = dr["PIC3StaffNo"].ToString();
+                    licenseAdmin.PIC3Name = dr["PIC3Name"].ToString();
+                    licenseAdmin.PIC3Email = dr["PIC3Email"].ToString();
+
+                    licenseAdmin.UserType = dr["UserType"].ToString();
+
+                    licenseAdmin.Remarks = dr["Remarks"].ToString();
+
+                    licenseAdmin.isRequested = Convert.ToBoolean(dr["isRequested"].ToString());
+                    licenseAdmin.isApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseAdmin.isRejected = Convert.ToBoolean(dr["isRejected"].ToString());
+                    licenseAdmin.isRegistered = Convert.ToBoolean(dr["isRegistered"].ToString());
+                    licenseAdmin.isRenewed = Convert.ToBoolean(dr["isRenewed"].ToString());
+
+                    licenseAdmin.LicenseFileName = dr["LicenseFileName"].ToString();
+
+                    licenseAdmin.RenewReminderDT = Convert.ToDateTime(dr["RenewReminderDT"].ToString());
+
+                    licenseAdmin.RejectionRemarks = dr["RejectRemarks"].ToString();
+                }
+
+                conn.Close();
+            }
+
+            return licenseAdmin;
+        }
+        #endregion
+
+        #region CHECK DUPLICATE LICENSE HQ NAME
+        public LicenseAdmin CheckLicenseHQByName(string LicenseName)
+        {
+            var licenseAdmin = new LicenseAdmin();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseHQCheck", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseName", LicenseName);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    licenseAdmin.ExistData = Convert.ToInt32(dr["ExistData"].ToString());
+                }
+
+                conn.Close();
+            }
+
+            return licenseAdmin;
+        }
+        #endregion
+
+        #region REGISTER LICENSE HQ
+        public void RegisterLicenseHQ(LicenseAdmin licenseAdmin, string Issued, string Expired, string UserName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseHQRegister", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseID", licenseAdmin.LicenseID);
+                cmd.Parameters.AddWithValue("CategoryID", licenseAdmin.CategoryID);
+                cmd.Parameters.AddWithValue("DivID", licenseAdmin.DivID);
+                cmd.Parameters.AddWithValue("UnitID", licenseAdmin.UnitID);
+                cmd.Parameters.AddWithValue("LicenseName", licenseAdmin.LicenseName);
+                cmd.Parameters.AddWithValue("RegistrationNo", licenseAdmin.RegistrationNo);
+                cmd.Parameters.AddWithValue("SerialNo", licenseAdmin.SerialNo);
+                cmd.Parameters.AddWithValue("IssuedDT", Issued);
+                cmd.Parameters.AddWithValue("ExpiredDT", Expired);
+                cmd.Parameters.AddWithValue("PIC1Name", licenseAdmin.PIC1Name);
+                cmd.Parameters.AddWithValue("PIC2StaffNo", licenseAdmin.PIC2StaffNo);
+                cmd.Parameters.AddWithValue("PIC3StaffNo", licenseAdmin.PIC3StaffNo);
+                cmd.Parameters.AddWithValue("Remarks", licenseAdmin.Remarks);
+
+                //License File
+                cmd.Parameters.AddWithValue("LicenseFileName", licenseAdmin.LicenseFileName);
+
+                cmd.Parameters.AddWithValue("UserName", UserName);
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+        #endregion
+
+        #region HISTORY GRIDVIEW
+        public IEnumerable<LicenseAdmin> LicenseAdminGetLog(string LicenseName)
+        {
+            var counter = 1;
+
+            var licenseAdminList = new List<LicenseAdmin>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseAdminGetLog", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("LicenseName", LicenseName);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var licenseAdmin = new LicenseAdmin();
+
+                    licenseAdmin.IndexNo = counter;
+
+                    licenseAdmin.HistoryLicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
+                    licenseAdmin.HistoryLicenseName = dr["LicenseName"].ToString();
+                    licenseAdmin.HistoryRegistrationNo = dr["RegistrationNo"].ToString();
+                    licenseAdmin.HistorySerialNo = dr["SerialNo"].ToString();
+                    licenseAdmin.HistoryIssuedDT = dr["IssuedDT"].ToString();
+                    licenseAdmin.HistoryExpiredDT = dr["ExpiredDT"].ToString();
+                    licenseAdmin.HistoryPIC1Name = dr["PIC1Name"].ToString();
+                    licenseAdmin.HistoryPIC2Name = dr["PIC2Name"].ToString();
+                    licenseAdmin.HistoryPIC3Name = dr["PIC3Name"].ToString();
+                    licenseAdmin.HistoryisRequested = Convert.ToBoolean(dr["isRequested"].ToString());
+                    licenseAdmin.HistoryisApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseAdmin.HistoryisRejected = Convert.ToBoolean(dr["isRejected"].ToString());
+                    licenseAdmin.HistoryisRegistered = Convert.ToBoolean(dr["isRegistered"].ToString());
+                    licenseAdmin.HistoryisRenewed = Convert.ToBoolean(dr["isRenewed"].ToString());
+
+                    licenseAdmin.HistoryRenewReminderDT = Convert.ToDateTime(dr["RenewReminderDT"].ToString());
+
+                    licenseAdmin.HistoryhasFile = Convert.ToBoolean(dr["hasFile"].ToString());
+
+                    licenseAdminList.Add(licenseAdmin);
+
+                    counter++;
+                }
+
+                conn.Close();
+            }
+
+            return licenseAdminList;
+        }
+        #endregion
+
+        #region RENEWAL LICENSE HQ
+        public void RenewalLicenseHQ(RenewalLicenseHQViewModel licenseAdmin, string Issued, string Expired, string UserName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseHQRenewal", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("CategoryID", licenseAdmin.RenewalLicense.CategoryID);
+                cmd.Parameters.AddWithValue("DivID", licenseAdmin.RenewalLicense.DivID);
+                cmd.Parameters.AddWithValue("UnitID", licenseAdmin.RenewalLicense.UnitID);
+                cmd.Parameters.AddWithValue("LicenseName", licenseAdmin.RenewalLicense.LicenseName);
+                cmd.Parameters.AddWithValue("RegistrationNo", licenseAdmin.RenewalLicense.NewRegistrationNo);
+                cmd.Parameters.AddWithValue("SerialNo", licenseAdmin.RenewalLicense.NewSerialNo);
+                cmd.Parameters.AddWithValue("IssuedDT", Issued);
+                cmd.Parameters.AddWithValue("ExpiredDT", Expired);
+                cmd.Parameters.AddWithValue("PIC1Name", licenseAdmin.RenewalLicense.NewPIC1Name);
+                cmd.Parameters.AddWithValue("PIC2StaffNo", licenseAdmin.RenewalLicense.NewPIC2StaffNo);
+                cmd.Parameters.AddWithValue("PIC3StaffNo", licenseAdmin.RenewalLicense.NewPIC3StaffNo);
+                cmd.Parameters.AddWithValue("Remarks", licenseAdmin.RenewalLicense.NewRemarks);
+
+                //License File
+                cmd.Parameters.AddWithValue("LicenseFileName", licenseAdmin.RenewalLicense.NewLicenseFileName);
+
+                cmd.Parameters.AddWithValue("UserName", UserName);
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+        #endregion
+        #endregion
+
+        #region LICENSE APPROVAL
+        #region GRIDVIEW
+        public IEnumerable<LicenseApproval> LicenseApprovalGetAll()
+        {
+            var counter = 1;
+
+            var licenseApprovalList = new List<LicenseApproval>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseApprovalGetAll", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var licenseApproval = new LicenseApproval();
+
+                    licenseApproval.indexNo = counter;
+
+                    licenseApproval.LicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
+                    licenseApproval.LicenseName = dr["LicenseName"].ToString();
+                    licenseApproval.CategoryName = dr["CategoryName"].ToString();
+                    licenseApproval.UnitName = dr["UnitName"].ToString();
+                    licenseApproval.IssuedDT = dr["IssuedDT"].ToString();
+                    licenseApproval.ExpiredDT = dr["ExpiredDT"].ToString();
+                    licenseApproval.PIC1Name = dr["PIC1Name"].ToString();
+                    licenseApproval.PIC2Name = dr["PIC2Name"].ToString();
+                    licenseApproval.PIC3Name = dr["PIC3Name"].ToString();
+                    licenseApproval.isRequested = Convert.ToBoolean(dr["isRequested"].ToString());
+                    licenseApproval.isApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseApproval.isRejected = Convert.ToBoolean(dr["isRejected"].ToString());
+
+                    licenseApprovalList.Add(licenseApproval);
+
+                    counter++;
+                }
+
+                conn.Close();
+            }
+
+            return licenseApprovalList;
+        }
+        #endregion
+
+        #region GET LICENSE BY ID
+        //Get License HQ By ID
+        public LicenseApproval GetLicenseApprovalByID(int? id)
+        {
+            var licenseApproval = new LicenseApproval();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseApprovalGetById", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseID", id);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    licenseApproval.LicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
+                    licenseApproval.LicenseName = dr["LicenseName"].ToString();
+                    licenseApproval.CategoryID = Convert.ToInt32(dr["CategoryID"].ToString());
+                    licenseApproval.CategoryName = dr["CategoryName"].ToString();
+                    licenseApproval.DivID = Convert.ToInt32(dr["DivID"].ToString());
+                    licenseApproval.DivName = dr["DivName"].ToString();
+                    licenseApproval.UnitID = Convert.ToInt32(dr["UnitID"].ToString());
+                    licenseApproval.UnitName = dr["UnitName"].ToString();
+
+                    licenseApproval.RegistrationNo = dr["RegistrationNo"].ToString();
+                    licenseApproval.SerialNo = dr["SerialNo"].ToString();
+
+                    licenseApproval.PIC1StaffNo = dr["PIC1StaffNo"].ToString();
+                    licenseApproval.PIC1Name = dr["PIC1Name"].ToString();
+                    licenseApproval.PIC1Email = dr["PIC1Email"].ToString();
+
+                    licenseApproval.PIC2StaffNo = dr["PIC2StaffNo"].ToString();
+                    licenseApproval.PIC2Name = dr["PIC2Name"].ToString();
+                    licenseApproval.PIC2Email = dr["PIC2Email"].ToString();
+                    licenseApproval.PIC3StaffNo = dr["PIC3StaffNo"].ToString();
+                    licenseApproval.PIC3Name = dr["PIC3Name"].ToString();
+                    licenseApproval.PIC3Email = dr["PIC3Email"].ToString();
+                    licenseApproval.Remarks = dr["Remarks"].ToString();
+
+                    licenseApproval.isRequested = Convert.ToBoolean(dr["isRequested"].ToString());
+                    licenseApproval.isApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseApproval.isRejected = Convert.ToBoolean(dr["isRejected"].ToString());
+
+                    licenseApproval.RejectionRemarks = dr["RejectRemarks"].ToString();
+                }
+
+                conn.Close();
+            }
+
+            return licenseApproval;
+        }
+        #endregion
+
+        #region CONFIRM APPROVE
+        public void ApproveLicense(int Id, string UserName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseHQApprove", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseID", Id);
+                cmd.Parameters.AddWithValue("UserName", UserName);
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+        #endregion
+
+        #region CONFIRM REJECT
+        public void RejectLicense(int Id, string Remarks, string UserName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseHQReject", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseID", Id);
+                cmd.Parameters.AddWithValue("Remarks", Remarks);
+                cmd.Parameters.AddWithValue("UserName", UserName);
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
         }
         #endregion
         #endregion

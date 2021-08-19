@@ -3,6 +3,9 @@ C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\css\bo
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\css\gijgo.min.css
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\css\site.css
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\favicon.ico
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\Files\HQ\BLMS.PNG
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\Files\HQ\SQL SERVER.txt
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\Files\HQ\uem-edgenta-01-1536x726.png
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\fontawesome\all.css
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\fonts\gijgo-material.eot
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\PubTmp\Out\wwwroot\fonts\gijgo-material.svg

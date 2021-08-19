@@ -84,3 +84,13 @@ C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\CertBody\Inde
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\CertBody\Create.cshtml.g.cs
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\CertBody\Edit.cshtml.g.cs
 C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\Dashboard\Index.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseAdmin\DetailRegister.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseAdmin\DetailRenewal.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseAdmin\DetailRequest.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseAdmin\EditRegister.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseAdmin\EditRequest.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseAdmin\RegisterLicenseHQ.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseAdmin\RenewalLicenseHQ.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseApproval\Index.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseApproval\View.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Release\net5.0\Razor\Views\LicenseSite\Renewal.cshtml.g.cs

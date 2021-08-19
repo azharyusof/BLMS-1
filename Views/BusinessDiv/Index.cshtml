@@ -4,7 +4,7 @@
     ViewData["Title"] = "Business Division";
 }
 
-<section class="section align-baseline">
+<section class="section align-baseline" style="font-size: 12px;">
     <!-- Grid row -->
     <div class="row">
 
@@ -36,10 +36,10 @@
                                     <!-- Table head -->
                                     <thead>
                                         <tr>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-10">
+                                            <th class="text-sm font-weight-bold align-text-top col-md-10" style="font-size: 12px;">
                                                 @Html.DisplayNameFor(model => model.DivName)
                                             </th>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-2 text-center">Action</th>
+                                            <th class="text-sm font-weight-bold align-text-top col-md-2 text-center" style="font-size: 12px;">Action</th>
                                         </tr>
                                     </thead>
                                     <!-- Table head -->
@@ -48,14 +48,14 @@
                                         @foreach (var item in Model)
                                         {
                                             <tr id="row_@item.DivName">
-                                                <td scope="row" class="text-sm align-text-top col-md-10">
+                                                <td scope="row" class="text-sm align-text-top col-md-10" style="font-size: 12px;">
                                                     @Html.DisplayFor(modelItem => item.DivName)
                                                 </td>
-                                                <td class="text-center">
-                                                    <a class="btn btn-outline-primary btn-rounded btn-sm px-2" title="Edit" href="@Url.Action("Edit", "BusinessDiv", new {id=item.DivID})">
+                                                <td class="text-center" style="font-size: 12px;">
+                                                    <a class="btn btn-outline-primary btn-rounded btn-sm px-2" title="Edit" href="@Url.Action("Edit", "BusinessDiv", new {id=item.DivID})" style="font-size: 12px;">
                                                         <i class="fas fa-pencil-alt mt-0"></i>
                                                     </a>
-                                                    <a class="btn btn-outline-danger btn-rounded btn-sm px-2" title="Delete" href="#" onclick="ConfirmDelete(@item.DivID)">
+                                                    <a class="btn btn-outline-danger btn-rounded btn-sm px-2" title="Delete" href="#" onclick="ConfirmDelete(@item.DivID)" style="font-size: 12px;">
                                                         <i class="fas fa-trash-alt mt-0"></i>
                                                     </a>
                                                 </td>
@@ -86,7 +86,7 @@
                                     </div>
                                 </div>
 
-                                <a asp-action="Create" class="btn btn-outline-success btn-block text-white text-sm font-weight-bold"><i class="far fa fa-plus ml-1 text-black"></i> Create Business Division</a>
+                                <a asp-action="Create" class="btn btn-outline-success btn-block text-white text-sm font-weight-bold" style="font-size: 12px;"><i class="far fa fa-plus ml-1 text-black"></i> Create Business Division</a>
 
                                 @*hidden field for storing current employeeId*@
                                 <input type="hidden" id="hidDivId" />

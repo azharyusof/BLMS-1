@@ -44,6 +44,18 @@
               "target": "Package",
               "version": "[5.0.8, )"
             },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[5.0.9, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[5.0.9, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[5.0.9, )"
+            },
             "MimeKit": {
               "target": "Package",
               "version": "[2.13.0, )"

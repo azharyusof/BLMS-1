@@ -10,6 +10,9 @@ namespace BLMS.Models.License
 {
     public class LicenseHQ
     {
+        [DisplayName("#")]
+        public int indexNo { get; set; }
+
         [Key]
         public int LicenseID { get; set; }
 
@@ -99,6 +102,8 @@ namespace BLMS.Models.License
 
         public bool isApproved { get; set; }
 
+        public bool isRejected { get; set; }
+
         public bool isRegistered { get; set; }
 
         public bool isRenewed { get; set; }
@@ -112,16 +117,48 @@ namespace BLMS.Models.License
 
         public string LicenseFileName { get; set; }
 
-        public string FileType { get; set; }
-
-        public string Extension { get; set; }
-
-        public byte[] Data { get; set; }
-
         //check linked data
         public int ExistData { get; set; }
 
         //check license had file
         public bool hasFile { get; set; }
+
+        [Column(TypeName = "nvarchar(150)")]
+        [DisplayName("Rejection Remarks")]
+        public string RejectionRemarks { get; set; }
+
+        //History
+        public int HistoryLicenseID { get; set; }
+
+        public string HistoryLicenseName { get; set; }
+
+        public string HistoryRegistrationNo { get; set; }
+
+        public string HistorySerialNo { get; set; }
+
+        public string HistoryPIC1Name { get; set; }
+
+        public string HistoryPIC2Name { get; set; }
+
+        public string HistoryPIC3Name { get; set; }
+
+        //Flag
+        public bool HistoryisRequested { get; set; }
+
+        public bool HistoryisApproved { get; set; }
+
+        public bool HistoryisRejected { get; set; }
+
+        public bool HistoryisRegistered { get; set; }
+
+        public bool HistoryisRenewed { get; set; }
+
+        public bool HistoryhasFile { get; set; }
+
+        public string HistoryIssuedDT { get; set; }
+
+        public string HistoryExpiredDT { get; set; }
+
+        public DateTime HistoryRenewReminderDT { get; set; }
     }
 }

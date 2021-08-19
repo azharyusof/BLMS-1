@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<BLMS.Models.License.LicenseAdmin>
 
 @{
-    ViewData["Title"] = "Application Tracking";
+    ViewData["Title"] = "License Admin";
 }
 
-<section class="section align-baseline">
+<section class="section align-baseline" style="font-size: 12px;">
     <!-- Grid row -->
     <div class="row">
 
@@ -30,26 +30,29 @@
                                 @Html.Raw(@ViewBag.Alert)
                             </div>
 
-                            <div class="table table-wrapper table-responsive-sm">
+                            <div class="table table-wrapper table-striped table-responsive" style="width:100%">
                                 <!--Table-->
-                                <table id="LicenseAdmin" class="table table-bordered table-hover mb-0">
+                                <table id="LicenseHQ" class="table table-hover mb-0">
                                     <!-- Table head -->
-                                    <thead class="morpheus-den-gradient text-white">
+                                    <thead>
                                         <tr>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-2">
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size: 12px;">
+                                                @Html.DisplayNameFor(model => model.IndexNo)
+                                            </th>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size: 12px;">
                                                 @Html.DisplayNameFor(model => model.UnitName)
                                             </th>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-2">
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size: 12px;">
                                                 @Html.DisplayNameFor(model => model.LicenseName)
                                             </th>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-1">File</th>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-2">
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size: 12px;">
                                                 @Html.DisplayNameFor(model => model.CategoryName)
                                             </th>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-2">Person in Charge</th>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-1">Issued & Expired Date</th>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-1">User Type</th>
-                                            <th class="text-sm font-weight-bold align-text-top col-md-1">Status</th>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size: 12px;">Person in Charge</th>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size: 12px;">Issued & Expired Date</th>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size: 12px;">Type</th>
+                                            <th class="text-sm font-weight-bold align-text-top text-center" style="font-size: 12px;">File</th>
+                                            <th class="text-sm font-weight-bold align-text-top text-center" style="font-size: 12px;">Action</th>
                                         </tr>
                                     </thead>
                                     <!-- Table head -->
@@ -57,145 +60,180 @@
                                     <tbody>
                                         @foreach (var item in Model)
                                         {
-                                        <tr>
-                                            <td class="text-sm">
-                                                @Html.DisplayFor(modelItem => item.UnitName)
-                                            </td>
-                                            <td class="text-sm">
-                                                @if (item.isRequested == true | item.isApproved == true)
+                                            <tr>
+                                                @*Index No*@
+                                                <td class="text-sm text-center" style="font-size: 12px;">
+                                                    @Html.DisplayFor(modelItem => item.IndexNo)
+                                                </td>
+                                                @*Unit Name*@
+                                                <td class="text-sm col-2" style="font-size: 12px;">
+                                                    @Html.DisplayFor(modelItem => item.UnitName)
+                                                </td>
+                                                @*License Name*@
+                                            <td class="text-sm col-3" style="font-size: 12px;">
+                                                @*details for request/approve/reject license*@
+                                                @if (item.isRequested == true | item.isApproved == true | item.isRejected)
                                                 {
-                                                    <a href="@Url.Action("DetailRequest", "LicenseHQ", new {id=item.LicenseID})" class="font-weight-bold">
+                                                    <a href="@Url.Action("DetailRequest", "LicenseAdmin", new {id=item.LicenseID})" class="font-weight-bold">
                                                         @Html.DisplayFor(modelItem => item.LicenseName)
-                                                    </a>
 
-                                                    <br/><br/>
-
-                                                    @if (item.isApproved == true)
-                                                    {
-                                                        <a class="btn btn-outline-success btn-rounded btn-sm px-2" title="Click to Register" href="@Url.Action("RegisterLicense", "LicenseAdmin", new {id=item.DivID})">
-                                                            Click to Register
-                                                        </a>
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <a href="@Url.Action("DetailRegister", "LicenseHQ", new {id=item.LicenseID})" class="font-weight-bold">
-                                                        @Html.DisplayFor(modelItem => item.LicenseName)
+                                                        @if (item.isRequested == true)
+                                                        {
+                                                            <span class="badge bg-primary text-sm">Requested</span>
+                                                        }
+                                                        else if (item.isApproved == true)
+                                                        {
+                                                            <span class="badge bg-info text-sm">Approved</span>
+                                                        }
+                                                        else if (item.isRejected == true)
+                                                        {
+                                                            <span class="badge bg-danger text-sm">Rejected</span>
+                                                        }
                                                     </a>
                                                 }
-                                            </td>
-                                            <td class="text-center">
-                                                @if (item.hasFile == true)
-                                                {
-                                                    <a class="btn btn-outline-primary btn-rounded btn-sm px-2" type="button" title="Download File" asp-controller="LicenseAdmin" asp-action="DownloadLicenseFile" asp-route-id="@item.LicenseID">
-                                                        <i class="fas fa-file-alt mt-0"></i> Download
-                                                    </a>
-                                                }
-                                            </td>
-                                            <td class="text-sm">
-                                                @Html.DisplayFor(modelItem => item.CategoryName)
-                                            </td>
-                                            <td class="text-sm">
-                                                @if (string.IsNullOrEmpty(item.PIC1Name))
-                                                {
-
-                                                }
-                                                else
-                                                {
-                                                    <label class="font-weight-bold">PIC 1:</label>
-                                                    <br />
-                                                    @Html.DisplayFor(modelItem => item.PIC1Name)
-                                                    <br /><br />
-                                                }
-
-                                                @if (string.IsNullOrEmpty(item.PIC2Name))
-                                                {
-
-                                                }
-                                                else
-                                                {
-                                                    <label class="font-weight-bold">PIC 2:</label>
-                                                    <br />
-                                                    @Html.DisplayFor(modelItem => item.PIC2Name)
-                                                    <br /><br />
-                                                }
-
-                                                @if (string.IsNullOrEmpty(item.PIC3Name))
-                                                {
-
-                                                }
-                                                else
-                                                {
-                                                    <label class="font-weight-bold">PIC 3:</label>
-                                                    <br />
-                                                    @Html.DisplayFor(modelItem => item.PIC3Name)
-                                                }
-                                            </td>
-                                            <td class="text-sm text-center">
-                                                @if (string.IsNullOrEmpty(item.IssuedDT))
-                                                {
-
-                                                }
-                                                else
-                                                {
-                                                    <label class="font-weight-bold">Issued Date:</label>
-                                                    @Html.DisplayFor(modelItem => item.IssuedDT)
-                                                    <br /><br />
-                                                }
-
-                                                @if (string.IsNullOrEmpty(item.ExpiredDT))
-                                                {
-
-                                                }
-                                                else
-                                                {
-                                                    <label class="font-weight-bold">Expired Date:</label>
-                                                    @Html.DisplayFor(modelItem => item.ExpiredDT)
-                                                }
-                                            </td>
-                                            <td class="text-sm">
-                                                @Html.DisplayFor(modelItem => item.UserType)
-                                            </td>
-                                            <td class="text-center">
-                                                @if (item.isRequested == true)
-                                                {
-                                                    <button name="button" class="btn btn-outline-warning btn-rounded btn-sm px-2" disabled>
-                                                        <i class="fas fa-spinner mt-0"></i> Requested
-                                                    </button>
-                                                }
-                                                else if (item.isApproved == true)
-                                                {
-                                                    <button name="button" class="btn btn-outline-info btn-rounded btn-sm px-2" disabled>
-                                                        <i class="fas fa-clock mt-0"></i> Approved
-                                                    </button>
-                                                }
+                                                @*details for register license*@
                                                 else if (item.isRegistered == true)
                                                 {
-                                                    <button name="button" class="btn btn-outline-success btn-rounded btn-sm px-2" disabled>
-                                                        <i class="fas fa-check mt-0"></i> Registered
-                                                    </button>
+                                                    <a href="@Url.Action("DetailRegister", "LicenseAdmin", new {id=item.LicenseID})" class="font-weight-bold">
+                                                        @Html.DisplayFor(modelItem => item.LicenseName)
+
+                                                        <span class="badge bg-success text-sm">Registered</span>
+                                                    </a>
                                                 }
+                                                @*details for renewal license*@
                                                 else if (item.isRenewed == true)
                                                 {
-                                                    <button name="button" class="btn btn-outline-warning btn-rounded btn-sm px-2" disabled>
-                                                        <i class="fas fa-exclamation mt-0"></i> Renewed
-                                                    </button>
+                                                    <a href="@Url.Action("DetailRenewal", "LicenseAdmin", new {id=item.LicenseID})" class="font-weight-bold">
+                                                        @Html.DisplayFor(modelItem => item.LicenseName)
+
+                                                        <span class="badge bg-secondary text-sm">Renewed</span>
+                                                    </a>
                                                 }
 
+                                                @*expired badge*@
                                                 @if ((item.RenewReminderDT.Date - DateTime.Now.Date).Days > 0 | item.RenewReminderDT.ToString() == "9999-12-31 00:00:00.000")
                                                 {
-                                                    <button name="button" class="btn btn-outline-success btn-rounded btn-sm px-2" disabled>
-                                                        <i class="fas fa-thumbs-up mt-0"></i> Active
-                                                    </button>
+
                                                 }
                                                 else
                                                 {
-                                                    <button name="button" class="btn btn-outline-danger btn-rounded btn-sm px-2" disabled>
-                                                        <i class="fas fa-thumbs-down mt-0"></i> Not Active
-                                                    </button>
+                                                    <span class="badge bg-danger text-sm">Expired</span>
                                                 }
                                             </td>
-                                        </tr>
+                                                @*License Type*@
+                                                <td class="text-sm" style="font-size: 12px;">
+                                                    @Html.DisplayFor(modelItem => item.CategoryName)
+                                                </td>
+                                                @*Person In Charge*@
+                                                <td class="text-sm col-3" style="font-size: 12px;">
+                                                    @if (string.IsNullOrEmpty(item.PIC1Name))
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="font-weight-bold">PIC 1:</label>
+                                                        <br />
+                                                        @Html.DisplayFor(modelItem => item.PIC1Name)
+                                                        <br /><br />
+                                                    }
+
+                                                    @if (string.IsNullOrEmpty(item.PIC2Name))
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="font-weight-bold">PIC 2:</label>
+                                                        <br />
+                                                        @Html.DisplayFor(modelItem => item.PIC2Name)
+                                                        <br /><br />
+                                                    }
+
+                                                    @if (string.IsNullOrEmpty(item.PIC3Name))
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="font-weight-bold">PIC 3:</label>
+                                                        <br />
+                                                        @Html.DisplayFor(modelItem => item.PIC3Name)
+                                                    }
+                                                </td>
+                                                @*IssuedDT & ExpiredDT*@
+                                                <td class="text-sm text-center col-2" style="font-size: 12px;">
+                                                    @if (string.IsNullOrEmpty(item.IssuedDT))
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="font-weight-bold">Issued Date:</label>
+                                                        @Html.DisplayFor(modelItem => item.IssuedDT)
+                                                        <br /><br />
+                                                    }
+
+                                                    @if (string.IsNullOrEmpty(item.ExpiredDT))
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="font-weight-bold">Expired Date:</label>
+                                                        @Html.DisplayFor(modelItem => item.ExpiredDT)
+                                                    }
+                                                </td>
+                                                @*User Type*@
+                                                <td class="text-sm text-center" style="font-size: 12px;">
+                                                    @Html.DisplayFor(modelItem => item.UserType)
+                                                </td>
+                                                @*Download File*@
+                                                <td class="text-center col-1" style="font-size: 12px;">
+                                                    @if (item.hasFile == true)
+                                                    {
+                                                        <a class="btn btn-outline-primary btn-rounded btn-sm px-2" title="Download License File" href="@Url.Action("DownloadLicenseFile", "LicenseAdmin", new {id=item.LicenseID})">
+                                                            <i class="fas fa-download mt-0"></i>
+                                                        </a>
+                                                    }
+                                                </td>
+                                                @*Action*@
+                                                <td class="text-center col-1" style="font-size: 12px;">
+                                                    @*Edit license*@
+                                                    @if ((item.isRegistered == true || item.isRenewed == true) && (item.RenewReminderDT.Date - DateTime.Now.Date).Days > 0 | item.RenewReminderDT.ToString() == "9999-12-31 00:00:00.000")
+                                                    {
+                                                        <a class="btn btn-outline-purple btn-rounded btn-sm px-2" title="Edit License" href="@Url.Action("EditRegister", "LicenseAdmin", new {id=item.LicenseID})">
+                                                            <i class="fas fa-pen-alt mt-0"></i>
+                                                        </a>
+                                                    }
+                                                    else if (item.isRequested == true)
+                                                    {
+                                                        <a class="btn btn-outline-purple btn-rounded btn-sm px-2" title="Edit License" href="@Url.Action("EditRequest", "LicenseAdmin", new {id=item.LicenseID})">
+                                                            <i class="fas fa-pen-alt mt-0"></i>
+                                                        </a>
+                                                    }
+
+                                                    @*register license*@
+                                                    @if (item.isApproved == true)
+                                                    {
+                                                        <a class="btn btn-outline-success btn-rounded btn-sm px-2" title="Register License" href="@Url.Action("RegisterLicenseHQ", "LicenseAdmin", new {id=item.LicenseID})">
+                                                            <i class="fas fa-book-medical mt-0"></i>
+                                                        </a>
+                                                    }
+
+                                                    @*renew license*@
+                                                    @if ((item.RenewReminderDT.Date - DateTime.Now.Date).Days > 0 | item.RenewReminderDT.ToString() == "9999-12-31 00:00:00.000")
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <a class="btn btn-outline-warning btn-rounded btn-sm px-2" title="Renew License" href="@Url.Action("RenewalLicenseHQ", "LicenseAdmin", new {id=item.LicenseID})">
+                                                            <i class="fas fa-sync-alt mt-0"></i>
+                                                        </a>
+                                                    }
+                                                </td>
+                                            </tr>
                                         }
                                     </tbody>
                                     <!-- Table body -->
@@ -215,7 +253,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#LicenseAdmin').DataTable();
+            $('#LicenseHQ').DataTable();
             $('.dataTables_length').addClass('bs-select');
         });
 

@@ -4,13 +4,16 @@ using BLMS.CustomAttributes;
 using BLMS.Enums;
 using BLMS.Models;
 using BLMS.Models.License;
+using BLMS.ViewModel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.StaticFiles;
 using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
@@ -77,6 +80,30 @@ namespace BLMS.Controllers
             }
 
             return View(licenseHQ);
+        }
+        #endregion
+
+        #region VIEW REGISTER LICENSE
+        [Authorize(Roles.ADMINISTRATOR, Roles.PIC)]
+        [Authorize(AccessLevel.ADMINISTRATION, AccessLevel.HQ)]
+        [NoDirectAccess]
+        public ActionResult DetailRenewal(int id)
+        {
+            LicenseHQ licenseHQ = licenseDbContext.GetLicenseHQByID(id);
+
+            List<LicenseHQ> HistorylicenseHQ = licenseDbContext.LicenseHQGetLog(licenseHQ.LicenseName).ToList();
+
+            LicenseHQRenewal ViewModel = new LicenseHQRenewal();
+
+            ViewModel.RenewalLicense = licenseHQ;
+            ViewModel.LicenseLog = licenseDbContext.LicenseHQGetLog(licenseHQ.LicenseName).ToList();
+
+            if (ViewModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(ViewModel);
         }
         #endregion
 
@@ -214,12 +241,28 @@ namespace BLMS.Controllers
                     ModelState.AddModelError("", "Please select Business Unit");
                     ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select Business Unit");
                 }
+                else if (licenseHQ.PIC2StaffNo == licenseHQ.PIC3StaffNo)
+                {
+                    ModelState.AddModelError("", "PIC 2 and PIC 3 has same staff name.");
+                    ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "PIC 2 and PIC 3 has same staff name.");
+                }
                 else if (ModelState.IsValid)
                 {
                     if (String.IsNullOrEmpty(licenseHQ.Remarks))
                     {
                         licenseHQ.Remarks = "-";
                     }
+
+                    #region CHANGE FIRST LETTER (LOWER TO UPPER)
+                    TextInfo cultInfoLicenseName = new CultureInfo("en-US", false).TextInfo;
+                    string LicenseName = cultInfoLicenseName.ToTitleCase(licenseHQ.LicenseName);
+
+                    TextInfo cultInfoRemarks = new CultureInfo("en-US", false).TextInfo;
+                    string Remarks = cultInfoRemarks.ToTitleCase(licenseHQ.Remarks);
+
+                    licenseHQ.LicenseName = LicenseName;
+                    licenseHQ.Remarks = Remarks;
+                    #endregion
 
                     LicenseHQ checkLicense = licenseDbContext.CheckLicenseByName(licenseHQ.LicenseName);
 
@@ -298,7 +341,46 @@ namespace BLMS.Controllers
         }
         #endregion
 
-        #region Email
+        #region DOWNLOAD LICENSE FILE
+        [Authorize(Roles.ADMINISTRATOR)]
+        [Authorize(AccessLevel.ADMINISTRATION)]
+        public async Task<IActionResult> DownloadLicenseFile(int id)
+        {
+            LicenseHQ licenseHQ = licenseDbContext.GetLicenseHQByID(id);
+
+            //check license site is not null
+            if (licenseHQ == null) return null;
+
+            //get file path
+            var basePath = Path.Combine(Directory.GetCurrentDirectory() + "\\wwwroot\\Files\\HQ");
+            var filePath = Path.Combine(basePath, licenseHQ.LicenseFileName);
+
+            //get file extension to check mimeType
+            var extension = Path.GetExtension(licenseHQ.LicenseFileName);
+            const string DefaultContentType = "application/octet-stream";
+
+            var provider = new FileExtensionContentTypeProvider();
+
+            if (!provider.TryGetContentType(licenseHQ.LicenseFileName, out string contentType))
+            {
+                contentType = DefaultContentType;
+            }
+
+            var FileType = contentType;
+
+            //get memory stream of file
+            var memory = new MemoryStream();
+
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, FileType, licenseHQ.LicenseFileName);
+        }
+        #endregion
+
+        #region EMAIL
         public void Email(LicenseHQ licenseHQ)
         {
             string sendTo = "send ke siapa?";

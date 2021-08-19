@@ -116,8 +116,8 @@ namespace BLMS.Context
                 {
                     var pic2LicenseSite = new LicenseSite();
 
-                    pic2LicenseSite.PIC2StaffNo = dr["empl_no"].ToString();
-                    pic2LicenseSite.PIC2Name = dr["staff_name"].ToString();
+                    pic2LicenseSite.PIC2StaffNo = dr["PICStaffNo"].ToString();
+                    pic2LicenseSite.PIC2Name = dr["PICName"].ToString();
 
                     pic2LicenseSiteList.Add(pic2LicenseSite);
                 }
@@ -145,8 +145,8 @@ namespace BLMS.Context
                 {
                     var pic3LicenseSite = new LicenseSite();
 
-                    pic3LicenseSite.PIC3StaffNo = dr["empl_no"].ToString();
-                    pic3LicenseSite.PIC3Name = dr["staff_name"].ToString();
+                    pic3LicenseSite.PIC3StaffNo = dr["PICStaffNo"].ToString();
+                    pic3LicenseSite.PIC3Name = dr["PICName"].ToString();
 
                     pic3LicenseSiteList.Add(pic3LicenseSite);
                 }
@@ -295,7 +295,7 @@ namespace BLMS.Context
         }
         #endregion
 
-        #region ddlPIC3 For LicenseHQ
+        #region ddlPIC3
         public IEnumerable<LicenseHQ> ddlPIC3LicenseHQ()
         {
             var pic3LicenseHQList = new List<LicenseHQ>();
@@ -324,8 +324,174 @@ namespace BLMS.Context
         }
         #endregion
 
-        #region ddlBusinessUnitLinkedDivHQ For LicenseHQ
+        #region ddlBusinessUnitLinkedDivHQ
         public DataSet ddlBusinessUnitLinkedDivHQ(int DivID)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spDDLBusinessUnitLinkedDiv", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@DivID", DivID);
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataSet ds = new DataSet();
+                da.Fill(ds);
+                return ds;
+            }
+        }
+        #endregion
+        #endregion
+
+        #region LICENSE ADMIN
+        #region ddlCategory
+        public IEnumerable<LicenseAdmin> ddlCategoryLicenseAdmin()
+        {
+            var categoryLicenseAdminList = new List<LicenseAdmin>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spDDLCategory", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var categoryLicenseAdmin = new LicenseAdmin();
+
+                    categoryLicenseAdmin.CategoryID = Convert.ToInt32(dr["CategoryID"].ToString());
+                    categoryLicenseAdmin.CategoryName = dr["CategoryName"].ToString();
+
+                    categoryLicenseAdminList.Add(categoryLicenseAdmin);
+                }
+
+                conn.Close();
+            }
+
+            return categoryLicenseAdminList;
+        }
+        #endregion
+
+        #region ddlBusinessDiv
+        public IEnumerable<LicenseAdmin> ddlBusinessDivLicenseAdmin()
+        {
+            var businessDivLicenseAdminList = new List<LicenseAdmin>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spDDLBusinessDiv", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var businessDivLicenseAdmin = new LicenseAdmin();
+
+                    businessDivLicenseAdmin.DivID = Convert.ToInt32(dr["DivID"].ToString());
+                    businessDivLicenseAdmin.DivName = dr["DivName"].ToString();
+
+                    businessDivLicenseAdminList.Add(businessDivLicenseAdmin);
+                }
+
+                conn.Close();
+            }
+
+            return businessDivLicenseAdminList;
+        }
+        #endregion
+
+        #region ddlBusinessUnit
+        public IEnumerable<LicenseAdmin> ddlBusinessUnitLicenseAdmin()
+        {
+            var businessUnitLicenseAdminList = new List<LicenseAdmin>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spDDLBusinessUnit", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var businessUnitLicenseAdmin = new LicenseAdmin();
+
+                    businessUnitLicenseAdmin.UnitID = Convert.ToInt32(dr["UnitID"].ToString());
+                    businessUnitLicenseAdmin.UnitName = dr["UnitName"].ToString();
+
+                    businessUnitLicenseAdminList.Add(businessUnitLicenseAdmin);
+                }
+
+                conn.Close();
+            }
+
+            return businessUnitLicenseAdminList;
+        }
+        #endregion
+
+        #region ddlPIC2HQ
+        public IEnumerable<LicenseAdmin> ddlPIC2HQLicenseAdmin()
+        {
+            var pic2LicenseAdminList = new List<LicenseAdmin>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spDDLStaffHQ", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var pic2LicenseAdmin = new LicenseAdmin();
+
+                    pic2LicenseAdmin.PIC2StaffNo = dr["empl_no"].ToString();
+                    pic2LicenseAdmin.PIC2Name = dr["staff_name"].ToString();
+
+                    pic2LicenseAdminList.Add(pic2LicenseAdmin);
+                }
+
+                conn.Close();
+            }
+
+            return pic2LicenseAdminList;
+        }
+        #endregion
+
+        #region ddlPIC3
+        public IEnumerable<LicenseAdmin> ddlPIC3HQLicenseAdmin()
+        {
+            var pic3LicenseAdminList = new List<LicenseAdmin>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spDDLStaffHQ", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var pic3LicenseAdmin = new LicenseAdmin();
+
+                    pic3LicenseAdmin.PIC3StaffNo = dr["empl_no"].ToString();
+                    pic3LicenseAdmin.PIC3Name = dr["staff_name"].ToString();
+
+                    pic3LicenseAdminList.Add(pic3LicenseAdmin);
+                }
+
+                conn.Close();
+            }
+
+            return pic3LicenseAdminList;
+        }
+        #endregion
+
+        #region ddlBusinessUnitLinkedDivAdmin
+        public DataSet ddlBusinessUnitLinkedDivAdmin(int DivID)
         {
             using (SqlConnection conn = new SqlConnection(connectionstring))
             {

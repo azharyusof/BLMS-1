@@ -10,6 +10,9 @@ namespace BLMS.Models.License
 {
     public class LicenseSite
     {
+        [DisplayName("#")]
+        public int IndexNo { get; set; }
+
         [Key]
         public int LicenseID { get; set; }
 
@@ -17,7 +20,7 @@ namespace BLMS.Models.License
         public int CategoryID { get; set; }
 
         [Column(TypeName = "nvarchar(150)")]
-        [DisplayName("License Type")]
+        [DisplayName("Type of License")]
         public string CategoryName { get; set; }
 
         //License Details
@@ -106,12 +109,6 @@ namespace BLMS.Models.License
         public int LicenseFileId { get; set; }
 
         public string LicenseFileName { get; set; }
-
-        public string FileType { get; set; }
-
-        public string Extension { get; set; }
-
-        public byte[] Data { get; set; }
 
         //Renew Remainder
         public DateTime RenewReminderDT { get; set; }

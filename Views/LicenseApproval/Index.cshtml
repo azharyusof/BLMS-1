@@ -1,0 +1,157 @@
+﻿@model IEnumerable<BLMS.Models.License.LicenseApproval>
+
+@{
+    ViewData["Title"] = "License Approval";
+}
+
+<section class="section align-baseline" style="font-size:12px;">
+    <!-- Grid row -->
+    <div class="row">
+
+        <!-- Grid column -->
+        <div class="col-md-12">
+            <div class="card card-cascade cascading-admin-card user-card">
+                <!-- Card Data -->
+                <div class="admin-up d-flex justify-content-start">
+                    <i class="fas fa fa-check-double info-color py-4 mr-3 z-depth-2"></i>
+                    <div class="data">
+                        <h5 class="font-weight-bold dark-grey-text">
+                            License Approval
+                        </h5>
+                    </div>
+                </div>
+                <!-- Card Data -->
+                <!-- Card content -->
+                <div class="card-body card-body-cascade">
+                    <!-- Grid row -->
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="table table-wrapper table-responsive" style="width:100%">
+                                <!--Table-->
+                                <table id="LicenseApproval" class="table table-hover mb-0">
+                                    <!-- Table head -->
+                                    <thead>
+                                        <tr>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size:12px;">
+                                                @Html.DisplayNameFor(model => model.indexNo)
+                                            </th>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size:12px;">
+                                                @Html.DisplayNameFor(model => model.UnitName)
+                                            </th>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size:12px;">
+                                                @Html.DisplayNameFor(model => model.LicenseName)
+                                            </th>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size:12px;">
+                                                @Html.DisplayNameFor(model => model.CategoryName)
+                                            </th>
+                                            <th class="text-sm font-weight-bold align-text-top" style="font-size:12px;">Person in Charge</th>
+                                        </tr>
+                                    </thead>
+                                    <!-- Table head -->
+                                    <!-- Table body -->
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                @*Index No*@
+                                                <td class="text-sm text-center" style="font-size:12px;">
+                                                    @Html.DisplayFor(modelItem => item.indexNo)
+                                                </td>
+                                                @*Unit Name*@
+                                                <td class="text-sm col-2" style="font-size:12px;">
+                                                    @Html.DisplayFor(modelItem => item.UnitName)
+                                                </td>
+                                                @*License Name*@
+                                                <td class="text-sm col-3" style="font-size:12px;">
+                                                    <a href="@Url.Action("View", "LicenseApproval", new {id=item.LicenseID})" class="font-weight-bold">
+                                                        @Html.DisplayFor(modelItem => item.LicenseName)
+
+                                                        @if (item.isRequested == true)
+                                                        {
+                                                            <span class="badge bg-primary text-sm">Requested</span>
+                                                        }
+                                                        else if (item.isApproved == true)
+                                                        {
+                                                            <span class="badge bg-info text-sm">Approved</span>
+                                                        }
+                                                        else if (item.isRejected == true)
+                                                        {
+                                                            <span class="badge bg-danger text-sm">Rejected</span>
+                                                        }
+                                                    </a>
+                                                </td>
+                                                @*License Type*@
+                                                <td class="text-sm" style="font-size:12px;">
+                                                    @Html.DisplayFor(modelItem => item.CategoryName)
+                                                </td>
+                                                @*Person In Charge*@
+                                                <td class="text-sm col-3" style="font-size:12px;">
+                                                    @if (string.IsNullOrEmpty(item.PIC1Name))
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="font-weight-bold">PIC 1:</label>
+                                                        <br />
+                                                        @Html.DisplayFor(modelItem => item.PIC1Name)
+                                                        <br /><br />
+                                                    }
+
+                                                    @if (string.IsNullOrEmpty(item.PIC2Name))
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="font-weight-bold">PIC 2:</label>
+                                                        <br />
+                                                        @Html.DisplayFor(modelItem => item.PIC2Name)
+                                                        <br /><br />
+                                                    }
+
+                                                    @if (string.IsNullOrEmpty(item.PIC3Name))
+                                                    {
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="font-weight-bold">PIC 3:</label>
+                                                        <br />
+                                                        @Html.DisplayFor(modelItem => item.PIC3Name)
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <!-- Table body -->
+                                </table>
+                                <!-- Table -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Grid row -->
+                </div>
+                <!-- Card content -->
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#LicenseApproval').DataTable();
+            $('.dataTables_length').addClass('bs-select');
+        });
+
+        //auto hide viewbag.alert
+        $(document).ready(function () {
+            setTimeout(function () {
+                $("#alert").fadeOut();
+            }, 3000);
+        });
+    </script>
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
