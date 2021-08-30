@@ -87,6 +87,8 @@
                                                         <a href="@Url.Action("DetailRenewal", "LicenseSite", new {id=item.LicenseID})" class="font-weight-bold">
                                                             @Html.DisplayFor(modelItem => item.LicenseName)
 
+                                                            <br />
+
                                                             <span class="badge bg-secondary text-sm">Renewed</span>
                                                         </a>
                                                     }
@@ -179,7 +181,7 @@
                                                     @*Edit license*@
                                                     @if ((item.isRegistered == true || item.isRenewed == true) && (item.RenewReminderDT.Date - DateTime.Now.Date).Days > 0 | item.RenewReminderDT.ToString() == "9999-12-31 00:00:00.000")
                                                     {
-                                                        <a class="btn btn-outline-purple btn-rounded btn-sm px-2" title="Edit License" href="@Url.Action("EditRegister", "LicenseSite", new {id=item.LicenseID})">
+                                                        <a class="btn btn-outline-purple btn-rounded btn-sm px-2" title="Edit License" href="@Url.Action("Edit", "LicenseSite", new {id=item.LicenseID})">
                                                             <i class="fas fa-pen-alt mt-0"></i>
                                                         </a>
                                                     }

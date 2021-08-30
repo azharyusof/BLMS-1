@@ -142,3 +142,5 @@ C:\Users\azhar.yusof\Documents\BLMS\obj\Debug\net5.0\BLMS.csprojAssemblyReferenc
 C:\Users\azhar.yusof\Documents\BLMS\obj\Debug\net5.0\Razor\Views\CompetentPersonnel\Index.cshtml.g.cs
 C:\Users\azhar.yusof\Documents\BLMS\obj\Debug\net5.0\Razor\Views\CompetentPersonnel\Details.cshtml.g.cs
 C:\Users\azhar.yusof\Documents\BLMS\obj\Debug\net5.0\Razor\Views\CompetentPersonnel\Register.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Debug\net5.0\Razor\Views\LicenseSite\Edit.cshtml.g.cs
+C:\Users\azhar.yusof\Documents\BLMS\obj\Debug\net5.0\Razor\Views\LicenseSite\DetailRenewal.cshtml.g.cs

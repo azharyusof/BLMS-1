@@ -5,6 +5,7 @@
   },
   "compilationOptions": {
     "defines": [
+      "DEBUG",
       "TRACE",
       "DEBUG",
       "NET",
@@ -19,7 +20,7 @@
     "keyFile": "",
     "emitEntryPoint": true,
     "xmlDoc": false,
-    "debugType": "portable"
+    "debugType": "full"
   },
   "targets": {
     ".NETCoreApp,Version=v5.0": {

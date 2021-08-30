@@ -282,8 +282,8 @@ namespace BLMS.Context
                 {
                     var pic2LicenseHQ = new LicenseHQ();
 
-                    pic2LicenseHQ.PIC2StaffNo = dr["empl_no"].ToString();
-                    pic2LicenseHQ.PIC2Name = dr["staff_name"].ToString();
+                    pic2LicenseHQ.PIC2StaffNo = dr["PICStaffNo"].ToString();
+                    pic2LicenseHQ.PIC2Name = dr["PICName"].ToString();
 
                     pic2LicenseHQList.Add(pic2LicenseHQ);
                 }
@@ -311,8 +311,8 @@ namespace BLMS.Context
                 {
                     var pic3LicenseHQ = new LicenseHQ();
 
-                    pic3LicenseHQ.PIC3StaffNo = dr["empl_no"].ToString();
-                    pic3LicenseHQ.PIC3Name = dr["staff_name"].ToString();
+                    pic3LicenseHQ.PIC3StaffNo = dr["PICStaffNo"].ToString();
+                    pic3LicenseHQ.PIC3Name = dr["PICName"].ToString();
 
                     pic3LicenseHQList.Add(pic3LicenseHQ);
                 }
@@ -448,8 +448,8 @@ namespace BLMS.Context
                 {
                     var pic2LicenseAdmin = new LicenseAdmin();
 
-                    pic2LicenseAdmin.PIC2StaffNo = dr["empl_no"].ToString();
-                    pic2LicenseAdmin.PIC2Name = dr["staff_name"].ToString();
+                    pic2LicenseAdmin.PIC2StaffNo = dr["PICStaffNo"].ToString();
+                    pic2LicenseAdmin.PIC2Name = dr["PICName"].ToString();
 
                     pic2LicenseAdminList.Add(pic2LicenseAdmin);
                 }
@@ -477,8 +477,8 @@ namespace BLMS.Context
                 {
                     var pic3LicenseAdmin = new LicenseAdmin();
 
-                    pic3LicenseAdmin.PIC3StaffNo = dr["empl_no"].ToString();
-                    pic3LicenseAdmin.PIC3Name = dr["staff_name"].ToString();
+                    pic3LicenseAdmin.PIC3StaffNo = dr["PICStaffNo"].ToString();
+                    pic3LicenseAdmin.PIC3Name = dr["PICName"].ToString();
 
                     pic3LicenseAdminList.Add(pic3LicenseAdmin);
                 }

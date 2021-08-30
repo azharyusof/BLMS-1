@@ -4,6 +4,7 @@ using BLMS.CustomAttributes;
 using BLMS.Enums;
 using BLMS.Models;
 using BLMS.Models.License;
+using BLMS.ViewModel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,14 +45,18 @@ namespace BLMS.Controllers
             {
                 ViewBag.Alert = AlertNotification.ShowAlert(Alert.Success, TempData["renewalMessage"].ToString());
             }
+            else if (TempData["editMessage"] != null)
+            {
+                ViewBag.Alert = AlertNotification.ShowAlert(Alert.Success, TempData["editMessage"].ToString());
+            }
 
             return View(licenseSiteList);
         }
         #endregion
 
         #region VIEW REGISTER LICENSE
-        [Authorize(Roles.ADMINISTRATOR)]
-        [Authorize(AccessLevel.ADMINISTRATION)]
+        [Authorize(Roles.ADMINISTRATOR, Roles.PIC)]
+        [Authorize(AccessLevel.ADMINISTRATION, AccessLevel.SITE)]
         [NoDirectAccess]
         public ActionResult DetailRegister(int id)
         {
@@ -66,36 +71,65 @@ namespace BLMS.Controllers
         }
         #endregion
 
+        #region VIEW RENEWAL LICENSE
+        [Authorize(Roles.ADMINISTRATOR, Roles.PIC)]
+        [Authorize(AccessLevel.ADMINISTRATION, AccessLevel.SITE)]
+        [NoDirectAccess]
+        public ActionResult DetailRenewal(int id)
+        {
+            LicenseSite licenseSite = licenseDbContext.GetLicenseSiteByID(id);
+
+            List<LicenseSite> HistorylicenseSite = licenseDbContext.LicenseSiteGetLog(licenseSite.LicenseName).ToList();
+
+            RenewalLicenseSiteViewModel ViewModel = new RenewalLicenseSiteViewModel();
+
+            ViewModel.RenewalLicense = licenseSite;
+            ViewModel.History = licenseDbContext.LicenseSiteGetLog(licenseSite.LicenseName).ToList();
+
+            if (ViewModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(ViewModel);
+        }
+        #endregion
+
         #region REGISTER
         [Authorize(Roles.ADMINISTRATOR, Roles.PIC)]
         [Authorize(AccessLevel.ADMINISTRATION, AccessLevel.SITE)]
         [HttpGet]
         public ActionResult Register()
         {
-            //ddlCategory
-            List<LicenseSite> categoryLicenseSiteList = ddlLicenseDBContext.ddlCategoryLicenseSite().ToList();
+            #region Dropdownlist
+            List<LicenseSite> categoryLicenseSiteList, businessDivLicenseSiteList, businessUnitLicenseSiteList, PIC2LicenseSiteList, PIC3LicenseSiteList;
+
+            //ddlCategory      
+            categoryLicenseSiteList = ddlLicenseDBContext.ddlCategoryLicenseSite().ToList();
             categoryLicenseSiteList.Insert(0, new LicenseSite { CategoryID = 0, CategoryName = "Please select License Type" });
-            ViewBag.ListofCategory = categoryLicenseSiteList;
 
-            //ddlBusinessDiv
-            List<LicenseSite> businessDivLicenseSiteList = ddlLicenseDBContext.ddlBusinessDivLicenseSite().ToList();
+            //ddlBusinessDiv      
+            businessDivLicenseSiteList = ddlLicenseDBContext.ddlBusinessDivLicenseSite().ToList();
             businessDivLicenseSiteList.Insert(0, new LicenseSite { DivID = 0, DivName = "Please select Business Division" });
-            ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
 
-            //ddlBusinessUnit
-            List<LicenseSite> businessUnitLicenseSiteList = ddlLicenseDBContext.ddlBusinessUnitLicenseSite().ToList();
+            //ddlBusinessUnit             
+            businessUnitLicenseSiteList = ddlLicenseDBContext.ddlBusinessUnitLicenseSite().ToList();
             businessUnitLicenseSiteList.Insert(0, new LicenseSite { UnitID = 0, UnitName = "Please select Business Unit" });
-            ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
 
-            //ddlPIC2
-            List<LicenseSite> PIC2LicenseSiteList = ddlLicenseDBContext.ddlPIC2LicenseSite().ToList();
+            //ddlPIC2                  
+            PIC2LicenseSiteList = ddlLicenseDBContext.ddlPIC2LicenseSite().ToList();
             PIC2LicenseSiteList.Insert(0, new LicenseSite { PIC2StaffNo = "-", PIC2Name = "Please select PIC 2 Name" });
-            ViewBag.ListofPIC2 = PIC2LicenseSiteList;
 
-            //ddlPIC3
-            List<LicenseSite> PIC3LicenseSiteList = ddlLicenseDBContext.ddlPIC3LicenseSite().ToList();
-            PIC3LicenseSiteList.Insert(0, new LicenseSite { PIC3StaffNo = "-", PIC3Name = "Please select PIC 3 Name" });
+            //ddlPIC3   
+            PIC3LicenseSiteList = ddlLicenseDBContext.ddlPIC3LicenseSite().ToList();
+            PIC3LicenseSiteList.Insert(0, new LicenseSite { PIC3StaffNo = "-", PIC3Name = "Please Select PIC 3 Name" });
+
+            ViewBag.ListofCategory = categoryLicenseSiteList;
+            ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
+            ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
+            ViewBag.ListofPIC2 = PIC2LicenseSiteList;
             ViewBag.ListofPIC3 = PIC3LicenseSiteList;
+            #endregion
 
             return View();
         }
@@ -105,88 +139,441 @@ namespace BLMS.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Register([Bind] LicenseSite licenseSite, List<IFormFile> LicenseFile)
         {
+            string UserName = HttpContext.User.Identity.Name;
+
             try
             {
-                string UserName = HttpContext.User.Identity.Name;
-
-                DateTime issuedDT = Convert.ToDateTime(licenseSite.IssuedDT);
-                DateTime expiredDT = Convert.ToDateTime(licenseSite.ExpiredDT);
-
+                #region Dropdownlist
                 List<LicenseSite> categoryLicenseSiteList, businessDivLicenseSiteList, businessUnitLicenseSiteList, PIC2LicenseSiteList, PIC3LicenseSiteList;
 
+                //ddlCategory      
+                categoryLicenseSiteList = ddlLicenseDBContext.ddlCategoryLicenseSite().ToList();
+                categoryLicenseSiteList.Insert(0, new LicenseSite { CategoryID = 0, CategoryName = "Please select License Type" });
+
+                //ddlBusinessDiv      
+                businessDivLicenseSiteList = ddlLicenseDBContext.ddlBusinessDivLicenseSite().ToList();
+                businessDivLicenseSiteList.Insert(0, new LicenseSite { DivID = 0, DivName = "Please select Business Division" });
+
+                //ddlBusinessUnit             
+                businessUnitLicenseSiteList = ddlLicenseDBContext.ddlBusinessUnitLicenseSite().ToList();
+                businessUnitLicenseSiteList.Insert(0, new LicenseSite { UnitID = 0, UnitName = "Please select Business Unit" });
+
+                //ddlPIC2                  
+                PIC2LicenseSiteList = ddlLicenseDBContext.ddlPIC2LicenseSite().ToList();
+                PIC2LicenseSiteList.Insert(0, new LicenseSite { PIC2StaffNo = "-", PIC2Name = "Please select PIC 2 Name" });
+
+                //ddlPIC3   
+                PIC3LicenseSiteList = ddlLicenseDBContext.ddlPIC3LicenseSite().ToList();
+                PIC3LicenseSiteList.Insert(0, new LicenseSite { PIC3StaffNo = "-", PIC3Name = "Please Select PIC 3 Name" });
+                #endregion
+
+                LicenseSite checkLicenseSite = licenseDbContext.CheckLicenseSiteByName(licenseSite.LicenseName);
+
+                if (checkLicenseSite.ExistData == 1)
+                {
+                    ViewBag.Alert = AlertNotification.ShowAlert(Alert.Danger, string.Format("{0} already existed in BLMS database!", licenseSite.LicenseName));
+                }
+                else
+                {
+                    foreach (var licenseFile in LicenseFile)
+                    {
+                        var fileName = Path.GetFileNameWithoutExtension(licenseFile.FileName);
+                        licenseSite.LicenseFileName = fileName;
+                    }
+
+                    #region CUSTOM VALIDATION
+                    DateTime issuedDT = Convert.ToDateTime(licenseSite.IssuedDT);
+                    DateTime expiredDT = Convert.ToDateTime(licenseSite.ExpiredDT);
+
+                    if (string.IsNullOrEmpty(licenseSite.LicenseFileName))
+                    {
+                        ModelState.AddModelError("", "Please upload License File");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please upload License File");
+                    }
+                    else if (string.IsNullOrEmpty(licenseSite.LicenseName))
+                    {
+                        ModelState.AddModelError("", "Please type License Name");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please type License Name");
+                    }
+                    else if (string.IsNullOrEmpty(licenseSite.RegistrationNo))
+                    {
+                        ModelState.AddModelError("", "Please type Registration No");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please type Registration No");
+                    }
+                    else if (licenseSite.CategoryID == 0)
+                    {
+                        ModelState.AddModelError("", "Please select License Type");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select License Type");
+                    }
+                    else if (licenseSite.DivID == 0)
+                    {
+                        ModelState.AddModelError("", "Please select Business Division");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select Business Division");
+                    }
+                    else if (licenseSite.UnitID == 0)
+                    {
+                        ModelState.AddModelError("", "Please select Business Unit");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select Business Unit");
+                    }
+                    else if (licenseSite.IssuedDT != null && licenseSite.ExpiredDT != null && issuedDT.Date > expiredDT.Date)
+                    {
+                        ModelState.AddModelError("", "Expire Date {1} cannot less than Issue Date {0}");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, string.Format("Expire Date {1} cannot less than Issue Date {0}", licenseSite.IssuedDT, licenseSite.ExpiredDT));
+                    }
+                    else if (string.IsNullOrEmpty(licenseSite.PIC1Name))
+                    {
+                        ModelState.AddModelError("", "Login session is expired. Please login again");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Login session is expired. Please login again");
+                    }
+                    else if (licenseSite.PIC2StaffNo != "-" && licenseSite.PIC3StaffNo != "-" && licenseSite.PIC2StaffNo == licenseSite.PIC3StaffNo)
+                    {
+                        ModelState.AddModelError("", "PIC 2 and PIC 3 contains same Staff Name");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "PIC 2 and PIC 3 contains same Staff Name");
+                    }
+                    #endregion
+                    else
+                    {
+                        #region INITIALIZE MODEL DATA
+                        if (String.IsNullOrEmpty(licenseSite.SerialNo))
+                        {
+                            licenseSite.SerialNo = "-";
+                        }
+
+                        if (String.IsNullOrEmpty(licenseSite.IssuedDT))
+                        {
+                            licenseSite.IssuedDT = "-";
+                        }
+
+                        if (String.IsNullOrEmpty(licenseSite.ExpiredDT))
+                        {
+                            licenseSite.ExpiredDT = "-";
+                        }
+
+                        if (String.IsNullOrEmpty(licenseSite.Remarks))
+                        {
+                            licenseSite.Remarks = "-";
+                        }
+
+                        if (LicenseFile.Count == 0)
+                        {
+                            licenseSite.LicenseFileName = "-";
+                        }
+                        #endregion
+
+                        #region CHANGE FIRST LETTER (LOWER TO UPPER)
+                        TextInfo cultInfoLicenseName = new CultureInfo("en-US", false).TextInfo;
+                        string LicenseName = cultInfoLicenseName.ToTitleCase(licenseSite.LicenseName);
+
+                        TextInfo cultInfoRemarks = new CultureInfo("en-US", false).TextInfo;
+                        string Remarks = cultInfoRemarks.ToTitleCase(licenseSite.Remarks);
+
+                        licenseSite.LicenseName = LicenseName;
+                        licenseSite.Remarks = Remarks;
+                        #endregion
+
+                        #region SAVE DATA
+                        foreach (var licenseFile in LicenseFile)
+                        {
+                            var basePath = Path.Combine(Directory.GetCurrentDirectory() + "\\wwwroot\\Files\\SITE\\");
+                            bool basePathExists = System.IO.Directory.Exists(basePath);
+
+                            if (!basePathExists) Directory.CreateDirectory(basePath);
+
+                            var fileName = Path.GetFileNameWithoutExtension(licenseFile.FileName);
+                            var filePath = Path.Combine(basePath, licenseFile.FileName);
+                            var extension = Path.GetExtension(licenseFile.FileName);
+
+                            if (!System.IO.File.Exists(filePath))
+                            {
+                                using (var stream = new FileStream(filePath, FileMode.Create))
+                                {
+                                    licenseFile.CopyToAsync(stream);
+                                }
+
+                                licenseSite.LicenseFileName = fileName + extension;
+                            }
+                        }
+
+                        TempData["registerMessage"] = string.Format("{0} has been successfully registered!", licenseSite.LicenseName);
+                        licenseDbContext.RegisterLicenseSite(licenseSite, UserName);
+
+                        return RedirectToAction("Index", "LicenseSite");
+                        #endregion
+                    }
+                }
+
+                ViewBag.ListofCategory = categoryLicenseSiteList;
+                ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
+                ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
+                ViewBag.ListofPIC2 = PIC2LicenseSiteList;
+                ViewBag.ListofPIC3 = PIC3LicenseSiteList;
+
+                return View(licenseSite);
+            }
+            catch
+            {
+                #region INITIALIZE MODEL DATA
+                if (String.IsNullOrEmpty(licenseSite.SerialNo))
+                {
+                    licenseSite.SerialNo = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.IssuedDT))
+                {
+                    licenseSite.IssuedDT = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.ExpiredDT))
+                {
+                    licenseSite.ExpiredDT = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.Remarks))
+                {
+                    licenseSite.Remarks = "-";
+                }
+
+                if (LicenseFile.Count == 0)
+                {
+                    licenseSite.LicenseFileName = "-";
+                }
+                #endregion
+
+                #region CHANGE FIRST LETTER (LOWER TO UPPER)
+                TextInfo cultInfoLicenseName = new CultureInfo("en-US", false).TextInfo;
+                string LicenseName = cultInfoLicenseName.ToTitleCase(licenseSite.LicenseName);
+
+                TextInfo cultInfoRemarks = new CultureInfo("en-US", false).TextInfo;
+                string Remarks = cultInfoRemarks.ToTitleCase(licenseSite.Remarks);
+
+                licenseSite.LicenseName = LicenseName;
+                licenseSite.Remarks = Remarks;
+                #endregion
+
+                #region SAVE DATA
+                foreach (var licenseFile in LicenseFile)
+                {
+                    var basePath = Path.Combine(Directory.GetCurrentDirectory() + "\\wwwroot\\Files\\SITE\\");
+                    bool basePathExists = System.IO.Directory.Exists(basePath);
+
+                    if (!basePathExists) Directory.CreateDirectory(basePath);
+
+                    var fileName = Path.GetFileNameWithoutExtension(licenseFile.FileName);
+                    var filePath = Path.Combine(basePath, licenseFile.FileName);
+                    var extension = Path.GetExtension(licenseFile.FileName);
+
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            licenseFile.CopyToAsync(stream);
+                        }
+
+                        licenseSite.LicenseFileName = fileName + extension;
+                    }
+                }
+
+                TempData["registerMessage"] = string.Format("{0} has been successfully registered!", licenseSite.LicenseName);
+                licenseDbContext.RegisterLicenseSite(licenseSite, UserName);
+
+                return RedirectToAction("Index", "LicenseSite");
+                #endregion
+            }
+        }
+        #endregion
+
+        #region RENEWAL
+        [Authorize(Roles.ADMINISTRATOR, Roles.PIC)]
+        [Authorize(AccessLevel.ADMINISTRATION, AccessLevel.SITE)]
+        [HttpGet]
+        public ActionResult Renewal(int id)
+        {
+            #region VIEW MODEL
+            LicenseSite licenseSite = licenseDbContext.GetLicenseSiteByID(id);
+
+            List<LicenseSite> HistorylicenseSite = licenseDbContext.LicenseSiteGetLog(licenseSite.LicenseName).ToList();
+
+            RenewalLicenseSiteViewModel ViewModel = new RenewalLicenseSiteViewModel();
+
+            ViewModel.RenewalLicense = licenseSite;
+            ViewModel.History = licenseDbContext.LicenseSiteGetLog(licenseSite.LicenseName).ToList();
+            #endregion
+
+            if (ViewModel == null)
+            {
+                return NotFound();
+            }
+
+            #region DROPDOWNLIST
+            List<LicenseSite> categoryLicenseSiteList, businessDivLicenseSiteList, businessUnitLicenseSiteList, PIC2LicenseSiteList, PIC3LicenseSiteList;
+
+            //ddlCategory      
+            categoryLicenseSiteList = ddlLicenseDBContext.ddlCategoryLicenseSite().ToList();
+            categoryLicenseSiteList.Insert(0, new LicenseSite { CategoryID = 0, CategoryName = "Please select License Type" });
+
+            //ddlBusinessDiv      
+            businessDivLicenseSiteList = ddlLicenseDBContext.ddlBusinessDivLicenseSite().ToList();
+            businessDivLicenseSiteList.Insert(0, new LicenseSite { DivID = 0, DivName = "Please select Business Division" });
+
+            //ddlBusinessUnit             
+            businessUnitLicenseSiteList = ddlLicenseDBContext.ddlBusinessUnitLicenseSite().ToList();
+            businessUnitLicenseSiteList.Insert(0, new LicenseSite { UnitID = 0, UnitName = "Please select Business Unit" });
+
+            //ddlPIC2                  
+            PIC2LicenseSiteList = ddlLicenseDBContext.ddlPIC2LicenseSite().ToList();
+            PIC2LicenseSiteList.Insert(0, new LicenseSite { PIC2StaffNo = "-", PIC2Name = "Please select PIC 2 Name" });
+
+            //ddlPIC3   
+            PIC3LicenseSiteList = ddlLicenseDBContext.ddlPIC3LicenseSite().ToList();
+            PIC3LicenseSiteList.Insert(0, new LicenseSite { PIC3StaffNo = "-", PIC3Name = "Please Select PIC 3 Name" });
+
+            ViewBag.ListofCategory = categoryLicenseSiteList;
+            ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
+            ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
+            ViewBag.ListofPIC2 = PIC2LicenseSiteList;
+            ViewBag.ListofPIC3 = PIC3LicenseSiteList;
+            #endregion
+
+            return View(ViewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Renewal([Bind] RenewalLicenseSiteViewModel licenseSite, List<IFormFile> LicenseFile)
+        {
+            string UserName = HttpContext.User.Identity.Name;
+
+            try
+            {
+                RenewalLicenseSiteViewModel ViewModel = new RenewalLicenseSiteViewModel();
+
+                ViewModel.RenewalLicense = licenseSite.RenewalLicense;
+                ViewModel.History = licenseDbContext.LicenseSiteGetLog(licenseSite.RenewalLicense.LicenseName).ToList();
+
+                #region DROPDOWNLIST
+                List<LicenseSite> categoryLicenseSiteList, businessDivLicenseSiteList, businessUnitLicenseSiteList, PIC2LicenseSiteList, PIC3LicenseSiteList;
+
+                //ddlCategory      
+                categoryLicenseSiteList = ddlLicenseDBContext.ddlCategoryLicenseSite().ToList();
+                categoryLicenseSiteList.Insert(0, new LicenseSite { CategoryID = 0, CategoryName = "Please select License Type" });
+
+                //ddlBusinessDiv      
+                businessDivLicenseSiteList = ddlLicenseDBContext.ddlBusinessDivLicenseSite().ToList();
+                businessDivLicenseSiteList.Insert(0, new LicenseSite { DivID = 0, DivName = "Please select Business Division" });
+
+                //ddlBusinessUnit             
+                businessUnitLicenseSiteList = ddlLicenseDBContext.ddlBusinessUnitLicenseSite().ToList();
+                businessUnitLicenseSiteList.Insert(0, new LicenseSite { UnitID = 0, UnitName = "Please select Business Unit" });
+
+                //ddlPIC2                  
+                PIC2LicenseSiteList = ddlLicenseDBContext.ddlPIC2LicenseSite().ToList();
+                PIC2LicenseSiteList.Insert(0, new LicenseSite { PIC2StaffNo = "-", PIC2Name = "Please select PIC 2 Name" });
+
+                //ddlPIC3   
+                PIC3LicenseSiteList = ddlLicenseDBContext.ddlPIC3LicenseSite().ToList();
+                PIC3LicenseSiteList.Insert(0, new LicenseSite { PIC3StaffNo = "-", PIC3Name = "Please Select PIC 3 Name" });
+                #endregion
+
+                #region CUSTOM VALIDATION
                 foreach (var licenseFile in LicenseFile)
                 {
                     var fileName = Path.GetFileNameWithoutExtension(licenseFile.FileName);
-                    licenseSite.LicenseFileName = fileName;
+                    var extension = Path.GetExtension(licenseFile.FileName);
+
+                    licenseSite.RenewalLicense.NewLicenseFileName = fileName + extension;
                 }
 
-                if (string.IsNullOrEmpty(licenseSite.LicenseFileName))
+                LicenseSite checkLicenseSiteFile = licenseDbContext.CheckLicenseSiteFileByName(licenseSite.RenewalLicense.NewLicenseFileName);
+
+                DateTime issuedDT = Convert.ToDateTime(licenseSite.RenewalLicense.NewIssuedDT);
+                DateTime expiredDT = Convert.ToDateTime(licenseSite.RenewalLicense.NewExpiredDT);
+
+                if (string.IsNullOrEmpty(licenseSite.RenewalLicense.NewLicenseFileName))
                 {
                     ModelState.AddModelError("", "Please upload License File");
                     ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please upload License File");
                 }
-                else if (string.IsNullOrEmpty(licenseSite.LicenseName))
+                else if (checkLicenseSiteFile.ExistData == 1)
                 {
-                    ModelState.AddModelError("", "Please type License Name");
-                    ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please type License Name");
+                    ViewBag.Alert = AlertNotification.ShowAlert(Alert.Danger, string.Format("License file {0} already existed in BLMS database!", licenseSite.RenewalLicense.NewLicenseFileName));
                 }
-                else if (string.IsNullOrEmpty(licenseSite.RegistrationNo))
+                else if (string.IsNullOrEmpty(licenseSite.RenewalLicense.NewRegistrationNo))
                 {
                     ModelState.AddModelError("", "Please type Registration No");
                     ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please type Registration No");
                 }
-                else if (licenseSite.CategoryID == 0)
+                else if (licenseSite.RenewalLicense.CategoryID == 0)
                 {
                     ModelState.AddModelError("", "Please select License Type");
                     ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select License Type");
                 }
-                else if (licenseSite.DivID == 0)
+                else if (licenseSite.RenewalLicense.DivID == 0)
                 {
                     ModelState.AddModelError("", "Please select Business Division");
                     ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select Business Division");
                 }
-                else if (licenseSite.UnitID == 0)
+                else if (licenseSite.RenewalLicense.UnitID == 0)
                 {
                     ModelState.AddModelError("", "Please select Business Unit");
                     ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select Business Unit");
                 }
-                else if (licenseSite.IssuedDT != null && licenseSite.ExpiredDT != null && issuedDT.Date > expiredDT.Date)
+                else if (licenseSite.RenewalLicense.NewIssuedDT != null && licenseSite.RenewalLicense.NewExpiredDT != null && issuedDT.Date > expiredDT.Date)
                 {
                     ModelState.AddModelError("", "Expire Date {1} cannot less than Issue Date {0}");
-                    ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, string.Format("Expire Date {1} cannot less than Issue Date {0}", licenseSite.IssuedDT, licenseSite.ExpiredDT));
+                    ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, string.Format("Expire Date {1} cannot less than Issue Date {0}", licenseSite.RenewalLicense.NewIssuedDT, licenseSite.RenewalLicense.NewExpiredDT));
                 }
-                else if (string.IsNullOrEmpty(licenseSite.PIC1Name))
+                else if (string.IsNullOrEmpty(licenseSite.RenewalLicense.PIC1Name))
                 {
                     ModelState.AddModelError("", "Login session is expired. Please login again");
                     ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Login session is expired. Please login again");
                 }
-                else if (licenseSite.PIC2StaffNo != "-" && licenseSite.PIC3StaffNo != "-" && licenseSite.PIC2StaffNo == licenseSite.PIC3StaffNo)
+                else if (licenseSite.RenewalLicense.PIC2StaffNo != "-" && licenseSite.RenewalLicense.PIC3StaffNo != "-" && licenseSite.RenewalLicense.PIC2StaffNo == licenseSite.RenewalLicense.PIC3StaffNo)
                 {
                     ModelState.AddModelError("", "PIC 2 and PIC 3 contains same Staff Name");
                     ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "PIC 2 and PIC 3 contains same Staff Name");
                 }
-                else if (ModelState.IsValid)
+                #endregion
+                else
                 {
-                    if (String.IsNullOrEmpty(licenseSite.SerialNo))
+                    #region INITIALIZE MODEL DATA
+                    if (String.IsNullOrEmpty(licenseSite.RenewalLicense.NewSerialNo))
                     {
-                        licenseSite.SerialNo = "-";
+                        licenseSite.RenewalLicense.SerialNo = "-";
                     }
 
-                    if (String.IsNullOrEmpty(licenseSite.IssuedDT))
+                    if (String.IsNullOrEmpty(licenseSite.RenewalLicense.NewIssuedDT))
                     {
-                        licenseSite.IssuedDT = "-";
+                        licenseSite.RenewalLicense.NewIssuedDT = "-";
                     }
 
-                    if (String.IsNullOrEmpty(licenseSite.ExpiredDT))
+                    if (String.IsNullOrEmpty(licenseSite.RenewalLicense.NewExpiredDT))
                     {
-                        licenseSite.ExpiredDT = "-";
+                        licenseSite.RenewalLicense.NewExpiredDT = "-";
                     }
 
-                    if (String.IsNullOrEmpty(licenseSite.Remarks))
+                    if (String.IsNullOrEmpty(licenseSite.RenewalLicense.NewRemarks))
                     {
-                        licenseSite.Remarks = "-";
+                        licenseSite.RenewalLicense.NewRemarks = "-";
                     }
 
+                    if (LicenseFile.Count == 0)
+                    {
+                        licenseSite.RenewalLicense.NewLicenseFileName = "-";
+                    }
+                    #endregion
+
+                    #region CHANGE FIRST LETTER (LOWER TO UPPER)
+                    TextInfo cultInfoLicenseName = new CultureInfo("en-US", false).TextInfo;
+                    string LicenseName = cultInfoLicenseName.ToTitleCase(licenseSite.RenewalLicense.LicenseName);
+
+                    TextInfo cultInfoRemarks = new CultureInfo("en-US", false).TextInfo;
+                    string Remarks = cultInfoRemarks.ToTitleCase(licenseSite.RenewalLicense.NewRemarks);
+
+                    licenseSite.RenewalLicense.LicenseName = LicenseName;
+                    licenseSite.RenewalLicense.NewRemarks = Remarks;
+                    #endregion
+
+                    #region SAVE DATA
                     foreach (var licenseFile in LicenseFile)
                     {
                         var basePath = Path.Combine(Directory.GetCurrentDirectory() + "\\wwwroot\\Files\\SITE\\");
@@ -198,115 +585,391 @@ namespace BLMS.Controllers
                         var filePath = Path.Combine(basePath, licenseFile.FileName);
                         var extension = Path.GetExtension(licenseFile.FileName);
 
+                        licenseSite.RenewalLicense.NewLicenseFileName = fileName + extension;
+
                         if (!System.IO.File.Exists(filePath))
                         {
                             using (var stream = new FileStream(filePath, FileMode.Create))
                             {
                                 licenseFile.CopyToAsync(stream);
                             }
-
-                            licenseSite.LicenseFileName = fileName + extension;
                         }
                     }
 
-                    if (LicenseFile.Count == 0)
-                    {
-                        licenseSite.LicenseFileName = "-";
-                    }
+                    TempData["renewalMessage"] = string.Format("{0} has been successfully renewed!", licenseSite.RenewalLicense.LicenseName);
+                    licenseDbContext.RenewalLicenseSite(licenseSite, UserName);
 
-                    #region CHANGE FIRST LETTER (LOWER TO UPPER)
-                    TextInfo cultInfoLicenseName = new CultureInfo("en-US", false).TextInfo;
-                    string LicenseName = cultInfoLicenseName.ToTitleCase(licenseSite.LicenseName);
-
-                    TextInfo cultInfoRemarks = new CultureInfo("en-US", false).TextInfo;
-                    string Remarks = cultInfoRemarks.ToTitleCase(licenseSite.Remarks);
-
-                    licenseSite.LicenseName = LicenseName;
-                    licenseSite.Remarks = Remarks;
+                    return RedirectToAction("Index", "LicenseSite");
                     #endregion
+                }
 
-                    LicenseSite checkLicenseSite = licenseDbContext.CheckLicenseSiteByName(licenseSite.LicenseName);
-                    
-                    if (checkLicenseSite.ExistData == 1)
+                ViewBag.ListofCategory = categoryLicenseSiteList;
+                ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
+                ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
+                ViewBag.ListofPIC2 = PIC2LicenseSiteList;
+                ViewBag.ListofPIC3 = PIC3LicenseSiteList;
+
+                return View(ViewModel);
+            }
+            catch
+            {
+                #region INITIALIZE MODEL DATA
+                if (String.IsNullOrEmpty(licenseSite.RenewalLicense.NewSerialNo))
+                {
+                    licenseSite.RenewalLicense.SerialNo = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.RenewalLicense.NewIssuedDT))
+                {
+                    licenseSite.RenewalLicense.NewIssuedDT = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.RenewalLicense.NewExpiredDT))
+                {
+                    licenseSite.RenewalLicense.NewExpiredDT = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.RenewalLicense.NewRemarks))
+                {
+                    licenseSite.RenewalLicense.NewRemarks = "-";
+                }
+
+                if (LicenseFile.Count == 0)
+                {
+                    licenseSite.RenewalLicense.NewLicenseFileName = "-";
+                }
+                #endregion
+
+                #region CHANGE FIRST LETTER (LOWER TO UPPER)
+                TextInfo cultInfoLicenseName = new CultureInfo("en-US", false).TextInfo;
+                string LicenseName = cultInfoLicenseName.ToTitleCase(licenseSite.RenewalLicense.LicenseName);
+
+                TextInfo cultInfoRemarks = new CultureInfo("en-US", false).TextInfo;
+                string Remarks = cultInfoRemarks.ToTitleCase(licenseSite.RenewalLicense.NewRemarks);
+
+                licenseSite.RenewalLicense.LicenseName = LicenseName;
+                licenseSite.RenewalLicense.NewRemarks = Remarks;
+                #endregion
+
+                #region SAVE DATA
+                foreach (var licenseFile in LicenseFile)
+                {
+                    var basePath = Path.Combine(Directory.GetCurrentDirectory() + "\\wwwroot\\Files\\SITE\\");
+                    bool basePathExists = System.IO.Directory.Exists(basePath);
+
+                    if (!basePathExists) Directory.CreateDirectory(basePath);
+
+                    var fileName = Path.GetFileNameWithoutExtension(licenseFile.FileName);
+                    var filePath = Path.Combine(basePath, licenseFile.FileName);
+                    var extension = Path.GetExtension(licenseFile.FileName);
+
+                    licenseSite.RenewalLicense.NewLicenseFileName = fileName + extension;
+
+                    if (!System.IO.File.Exists(filePath))
                     {
-                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Danger, string.Format("{0} already existed in BLMS database!", licenseSite.LicenseName));
-
-                        //ddlCategory      
-                        categoryLicenseSiteList = ddlLicenseDBContext.ddlCategoryLicenseSite().ToList();
-                        categoryLicenseSiteList.Insert(0, new LicenseSite { CategoryID = 0, CategoryName = "Please select License Type" });
-                        ViewBag.ListofCategory = categoryLicenseSiteList;
-
-                        //ddlBusinessDiv      
-                        businessDivLicenseSiteList = ddlLicenseDBContext.ddlBusinessDivLicenseSite().ToList();
-                        businessDivLicenseSiteList.Insert(0, new LicenseSite { DivID = 0, DivName = "Please select Business Division" });
-                        ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
-
-                        //ddlBusinessUnit             
-                        businessUnitLicenseSiteList = ddlLicenseDBContext.ddlBusinessUnitLicenseSite().ToList();
-                        businessUnitLicenseSiteList.Insert(0, new LicenseSite { UnitID = 0, UnitName = "Please select Business Unit" });
-                        ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
-
-                        //ddlPIC2                  
-                        PIC2LicenseSiteList = ddlLicenseDBContext.ddlPIC2LicenseSite().ToList();
-                        PIC2LicenseSiteList.Insert(0, new LicenseSite { PIC2StaffNo = "-", PIC2Name = "Please select PIC 2 Name" });
-                        ViewBag.ListofPIC2 = PIC2LicenseSiteList;
-
-                        //ddlPIC3   
-                        PIC3LicenseSiteList = ddlLicenseDBContext.ddlPIC3LicenseSite().ToList();
-                        PIC3LicenseSiteList.Insert(0, new LicenseSite { PIC3StaffNo = "-", PIC3Name = "Please Select PIC 3 Name" });
-                        ViewBag.ListofPIC3 = PIC3LicenseSiteList;
-
-                        return View(licenseSite);
-                    }
-                    else
-                    {
-                        string Issued = licenseSite.IssuedDT;
-                        string Expired = licenseSite.ExpiredDT;
-
-                        licenseDbContext.RegisterLicenseSite(licenseSite, Issued, Expired, UserName);
-
-                        TempData["registerMessage"] = string.Format("{0} has been successfully registered!", licenseSite.LicenseName);
-
-                        return RedirectToAction("Index");
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            licenseFile.CopyToAsync(stream);
+                        }
                     }
                 }
+
+                TempData["renewalMessage"] = string.Format("{0} has been successfully renewed!", licenseSite.RenewalLicense.LicenseName);
+                licenseDbContext.RenewalLicenseSite(licenseSite, UserName);
+
+                return RedirectToAction("Index", "LicenseSite");
+                #endregion
+            }
+        }
+        #endregion
+
+        #region EDIT
+        [Authorize(Roles.ADMINISTRATOR)]
+        [Authorize(AccessLevel.ADMINISTRATION)]
+        [NoDirectAccess]
+        public ActionResult Edit(int id)
+        {
+            LicenseSite licenseSite = licenseDbContext.GetLicenseSiteByID(id);
+
+            if (licenseSite == null)
+            {
+                return NotFound();
+            }
+
+            #region DROPDOWNLIST
+            List<LicenseSite> categoryLicenseSiteList, businessDivLicenseSiteList, businessUnitLicenseSiteList, PIC2LicenseSiteList, PIC3LicenseSiteList;
+
+            //ddlCategory      
+            categoryLicenseSiteList = ddlLicenseDBContext.ddlCategoryLicenseSite().ToList();
+            categoryLicenseSiteList.Insert(0, new LicenseSite { CategoryID = 0, CategoryName = "Please select License Type" });
+
+            //ddlBusinessDiv      
+            businessDivLicenseSiteList = ddlLicenseDBContext.ddlBusinessDivLicenseSite().ToList();
+            businessDivLicenseSiteList.Insert(0, new LicenseSite { DivID = 0, DivName = "Please select Business Division" });
+
+            //ddlBusinessUnit             
+            businessUnitLicenseSiteList = ddlLicenseDBContext.ddlBusinessUnitLicenseSite().ToList();
+            businessUnitLicenseSiteList.Insert(0, new LicenseSite { UnitID = 0, UnitName = "Please select Business Unit" });
+
+            //ddlPIC2                  
+            PIC2LicenseSiteList = ddlLicenseDBContext.ddlPIC2LicenseSite().ToList();
+            PIC2LicenseSiteList.Insert(0, new LicenseSite { PIC2StaffNo = "-", PIC2Name = "Please select PIC 2 Name" });
+
+            //ddlPIC3   
+            PIC3LicenseSiteList = ddlLicenseDBContext.ddlPIC3LicenseSite().ToList();
+            PIC3LicenseSiteList.Insert(0, new LicenseSite { PIC3StaffNo = "-", PIC3Name = "Please Select PIC 3 Name" });
+
+            ViewBag.ListofCategory = categoryLicenseSiteList;
+            ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
+            ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
+            ViewBag.ListofPIC2 = PIC2LicenseSiteList;
+            ViewBag.ListofPIC3 = PIC3LicenseSiteList;
+            #endregion
+
+            return View(licenseSite);
+        }
+
+        // POST: LicenseHQController/Request
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind] LicenseSite licenseSite, List<IFormFile> LicenseFile)
+        {
+            string UserName = User.Identity.Name;
+
+            try
+            {
+                LicenseHQ checkLicense = licenseDbContext.CheckLicenseByName(licenseSite.LicenseName);
+
+                #region Dropdownlist
+                List<LicenseSite> categoryLicenseSiteList, businessDivLicenseSiteList, businessUnitLicenseSiteList, PIC2LicenseSiteList, PIC3LicenseSiteList;
 
                 //ddlCategory      
                 categoryLicenseSiteList = ddlLicenseDBContext.ddlCategoryLicenseSite().ToList();
                 categoryLicenseSiteList.Insert(0, new LicenseSite { CategoryID = 0, CategoryName = "Please select License Type" });
-                ViewBag.ListofCategory = categoryLicenseSiteList;
 
                 //ddlBusinessDiv      
                 businessDivLicenseSiteList = ddlLicenseDBContext.ddlBusinessDivLicenseSite().ToList();
                 businessDivLicenseSiteList.Insert(0, new LicenseSite { DivID = 0, DivName = "Please select Business Division" });
-                ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
 
                 //ddlBusinessUnit             
                 businessUnitLicenseSiteList = ddlLicenseDBContext.ddlBusinessUnitLicenseSite().ToList();
                 businessUnitLicenseSiteList.Insert(0, new LicenseSite { UnitID = 0, UnitName = "Please select Business Unit" });
-                ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
 
                 //ddlPIC2                  
                 PIC2LicenseSiteList = ddlLicenseDBContext.ddlPIC2LicenseSite().ToList();
                 PIC2LicenseSiteList.Insert(0, new LicenseSite { PIC2StaffNo = "-", PIC2Name = "Please select PIC 2 Name" });
-                ViewBag.ListofPIC2 = PIC2LicenseSiteList;
 
                 //ddlPIC3   
                 PIC3LicenseSiteList = ddlLicenseDBContext.ddlPIC3LicenseSite().ToList();
                 PIC3LicenseSiteList.Insert(0, new LicenseSite { PIC3StaffNo = "-", PIC3Name = "Please Select PIC 3 Name" });
+                #endregion
+
+                if (checkLicense.ExistData == 1 && licenseSite.OldLicenseName != licenseSite.LicenseName)
+                {
+                    ViewBag.Alert = AlertNotification.ShowAlert(Alert.Danger, string.Format("{0} already existed in BLMS database!", licenseSite.LicenseName));
+                }
+                else
+                {
+                    foreach (var licenseFile in LicenseFile)
+                    {
+                        var fileName = Path.GetFileNameWithoutExtension(licenseFile.FileName);
+                        licenseSite.LicenseFileName = fileName;
+                    }
+
+                    #region CUSTOM VALIDATION
+                    DateTime issuedDT = Convert.ToDateTime(licenseSite.IssuedDT);
+                    DateTime expiredDT = Convert.ToDateTime(licenseSite.ExpiredDT);
+
+                    if (string.IsNullOrEmpty(licenseSite.LicenseName))
+                    {
+                        ModelState.AddModelError("", "Please type License Name");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please type License Name");
+                    }
+                    else if (string.IsNullOrEmpty(licenseSite.RegistrationNo))
+                    {
+                        ModelState.AddModelError("", "Please type Registration No");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please type Registration No");
+                    }
+                    else if (licenseSite.CategoryID == 0)
+                    {
+                        ModelState.AddModelError("", "Please select License Type");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select License Type");
+                    }
+                    else if (licenseSite.DivID == 0)
+                    {
+                        ModelState.AddModelError("", "Please select Business Division");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select Business Division");
+                    }
+                    else if (licenseSite.UnitID == 0)
+                    {
+                        ModelState.AddModelError("", "Please select Business Unit");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Please select Business Unit");
+                    }
+                    else if (licenseSite.IssuedDT != null && licenseSite.ExpiredDT != null && issuedDT.Date > expiredDT.Date)
+                    {
+                        ModelState.AddModelError("", "Expire Date {1} cannot less than Issue Date {0}");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, string.Format("Expire Date {1} cannot less than Issue Date {0}", licenseSite.IssuedDT, licenseSite.ExpiredDT));
+                    }
+                    else if (string.IsNullOrEmpty(licenseSite.PIC1Name))
+                    {
+                        ModelState.AddModelError("", "Login session is expired. Please login again");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "Login session is expired. Please login again");
+                    }
+                    else if (licenseSite.PIC2StaffNo != "-" && licenseSite.PIC3StaffNo != "-" && licenseSite.PIC2StaffNo == licenseSite.PIC3StaffNo)
+                    {
+                        ModelState.AddModelError("", "PIC 2 and PIC 3 contains same Staff Name");
+                        ViewBag.Alert = AlertNotification.ShowAlert(Alert.Warning, "PIC 2 and PIC 3 contains same Staff Name");
+                    }
+                    #endregion
+                    else
+                    {
+                        #region INITIALIZE MODEL DATA
+                        if (String.IsNullOrEmpty(licenseSite.SerialNo))
+                        {
+                            licenseSite.SerialNo = "-";
+                        }
+
+                        if (String.IsNullOrEmpty(licenseSite.IssuedDT))
+                        {
+                            licenseSite.IssuedDT = "-";
+                        }
+
+                        if (String.IsNullOrEmpty(licenseSite.ExpiredDT))
+                        {
+                            licenseSite.ExpiredDT = "-";
+                        }
+
+                        if (String.IsNullOrEmpty(licenseSite.Remarks))
+                        {
+                            licenseSite.Remarks = "-";
+                        }
+
+                        if (LicenseFile.Count == 0)
+                        {
+                            licenseSite.LicenseFileName = "-";
+                        }
+                        #endregion
+
+                        #region CHANGE FIRST LETTER (LOWER TO UPPER)
+                        TextInfo cultInfoLicenseName = new CultureInfo("en-US", false).TextInfo;
+                        string LicenseName = cultInfoLicenseName.ToTitleCase(licenseSite.LicenseName);
+
+                        TextInfo cultInfoRemarks = new CultureInfo("en-US", false).TextInfo;
+                        string Remarks = cultInfoRemarks.ToTitleCase(licenseSite.Remarks);
+
+                        licenseSite.LicenseName = LicenseName;
+                        licenseSite.Remarks = Remarks;
+                        #endregion
+
+                        #region SAVE DATA
+                        foreach (var licenseFile in LicenseFile)
+                        {
+                            var basePath = Path.Combine(Directory.GetCurrentDirectory() + "\\wwwroot\\Files\\SITE\\");
+                            bool basePathExists = System.IO.Directory.Exists(basePath);
+
+                            if (!basePathExists) Directory.CreateDirectory(basePath);
+
+                            var fileName = Path.GetFileNameWithoutExtension(licenseFile.FileName);
+                            var filePath = Path.Combine(basePath, licenseFile.FileName);
+                            var extension = Path.GetExtension(licenseFile.FileName);
+
+                            if (!System.IO.File.Exists(filePath))
+                            {
+                                using (var stream = new FileStream(filePath, FileMode.Create))
+                                {
+                                    licenseFile.CopyToAsync(stream);
+                                }
+
+                                licenseSite.LicenseFileName = fileName + extension;
+                            }
+                        }
+
+                        TempData["editMessage"] = string.Format("{0} has been successfully edited!", licenseSite.LicenseName);
+                        licenseDbContext.EditLicenseSite(licenseSite, UserName);
+
+                        return RedirectToAction("Index", "LicenseSite");
+                        #endregion
+                    }
+                }
+
+                ViewBag.ListofCategory = categoryLicenseSiteList;
+                ViewBag.ListofBusinessDiv = businessDivLicenseSiteList;
+                ViewBag.ListofBusinessUnit = businessUnitLicenseSiteList;
+                ViewBag.ListofPIC2 = PIC2LicenseSiteList;
                 ViewBag.ListofPIC3 = PIC3LicenseSiteList;
 
                 return View(licenseSite);
             }
             catch
             {
-                return View();
+                #region INITIALIZE MODEL DATA
+                if (String.IsNullOrEmpty(licenseSite.SerialNo))
+                {
+                    licenseSite.SerialNo = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.IssuedDT))
+                {
+                    licenseSite.IssuedDT = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.ExpiredDT))
+                {
+                    licenseSite.ExpiredDT = "-";
+                }
+
+                if (String.IsNullOrEmpty(licenseSite.Remarks))
+                {
+                    licenseSite.Remarks = "-";
+                }
+
+                if (LicenseFile.Count == 0)
+                {
+                    licenseSite.LicenseFileName = "-";
+                }
+                #endregion
+
+                #region CHANGE FIRST LETTER (LOWER TO UPPER)
+                TextInfo cultInfoLicenseName = new CultureInfo("en-US", false).TextInfo;
+                string LicenseName = cultInfoLicenseName.ToTitleCase(licenseSite.LicenseName);
+
+                TextInfo cultInfoRemarks = new CultureInfo("en-US", false).TextInfo;
+                string Remarks = cultInfoRemarks.ToTitleCase(licenseSite.Remarks);
+
+                licenseSite.LicenseName = LicenseName;
+                licenseSite.Remarks = Remarks;
+                #endregion
+
+                #region SAVE DATA
+                foreach (var licenseFile in LicenseFile)
+                {
+                    var basePath = Path.Combine(Directory.GetCurrentDirectory() + "\\wwwroot\\Files\\SITE\\");
+                    bool basePathExists = System.IO.Directory.Exists(basePath);
+
+                    if (!basePathExists) Directory.CreateDirectory(basePath);
+
+                    var fileName = Path.GetFileNameWithoutExtension(licenseFile.FileName);
+                    var filePath = Path.Combine(basePath, licenseFile.FileName);
+                    var extension = Path.GetExtension(licenseFile.FileName);
+
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            licenseFile.CopyToAsync(stream);
+                        }
+
+                        licenseSite.LicenseFileName = fileName + extension;
+                    }
+                }
+
+                TempData["editMessage"] = string.Format("{0} has been successfully edited!", licenseSite.LicenseName);
+                licenseDbContext.EditLicenseSite(licenseSite, UserName);
+
+                return RedirectToAction("Index", "LicenseSite");
+                #endregion
             }
         }
-        #endregion
-
-        #region RENEWAL
-
         #endregion
 
         #region EMAIL SERVICE

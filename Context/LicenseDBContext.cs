@@ -64,45 +64,12 @@ namespace BLMS.Context
         #endregion
 
         #region REGISTER
-        public void RegisterLicenseSite(LicenseSite licenseSite, string Issued, string Expired, string UserName)
+        public void RegisterLicenseSite(LicenseSite licenseSite, string UserName)
         {
             using (SqlConnection conn = new SqlConnection(connectionstring))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand("spLicenseSiteRegister", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("CategoryID", licenseSite.CategoryID);
-                cmd.Parameters.AddWithValue("DivID", licenseSite.DivID);
-                cmd.Parameters.AddWithValue("UnitID", licenseSite.UnitID);
-                cmd.Parameters.AddWithValue("LicenseName", licenseSite.LicenseName);
-                cmd.Parameters.AddWithValue("RegistrationNo", licenseSite.RegistrationNo);
-                cmd.Parameters.AddWithValue("SerialNo", licenseSite.SerialNo);
-                cmd.Parameters.AddWithValue("IssuedDT", Issued);
-                cmd.Parameters.AddWithValue("ExpiredDT", Expired);
-                cmd.Parameters.AddWithValue("PIC1Name", licenseSite.PIC1Name);
-                cmd.Parameters.AddWithValue("PIC2StaffNo", licenseSite.PIC2StaffNo);
-                cmd.Parameters.AddWithValue("PIC3StaffNo", licenseSite.PIC3StaffNo);
-                cmd.Parameters.AddWithValue("Remarks", licenseSite.Remarks);
-
-                //License File
-                cmd.Parameters.AddWithValue("LicenseFileName", licenseSite.LicenseFileName);
-
-                cmd.Parameters.AddWithValue("UserName", UserName);
-
-                cmd.ExecuteNonQuery();
-                conn.Close();
-            }
-        }
-        #endregion
-
-        #region RENEWAL
-        public void RenewalLicenseSite(LicenseSite licenseSite, string UserName)
-        {
-            using (SqlConnection conn = new SqlConnection(connectionstring))
-            {
-                conn.Open();
-                SqlCommand cmd = new SqlCommand("spLicenseSiteRenewal", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.AddWithValue("CategoryID", licenseSite.CategoryID);
@@ -120,6 +87,39 @@ namespace BLMS.Context
 
                 //License File
                 cmd.Parameters.AddWithValue("LicenseFileName", licenseSite.LicenseFileName);
+
+                cmd.Parameters.AddWithValue("UserName", UserName);
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+        #endregion
+
+        #region RENEWAL
+        public void RenewalLicenseSite(RenewalLicenseSiteViewModel licenseSite, string UserName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseSiteRenewal", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("CategoryID", licenseSite.RenewalLicense.CategoryID);
+                cmd.Parameters.AddWithValue("DivID", licenseSite.RenewalLicense.DivID);
+                cmd.Parameters.AddWithValue("UnitID", licenseSite.RenewalLicense.UnitID);
+                cmd.Parameters.AddWithValue("LicenseName", licenseSite.RenewalLicense.LicenseName);
+                cmd.Parameters.AddWithValue("RegistrationNo", licenseSite.RenewalLicense.NewRegistrationNo);
+                cmd.Parameters.AddWithValue("SerialNo", licenseSite.RenewalLicense.NewSerialNo);
+                cmd.Parameters.AddWithValue("IssuedDT", licenseSite.RenewalLicense.NewIssuedDT);
+                cmd.Parameters.AddWithValue("ExpiredDT", licenseSite.RenewalLicense.NewExpiredDT);
+                cmd.Parameters.AddWithValue("PIC1Name", licenseSite.RenewalLicense.PIC1Name);
+                cmd.Parameters.AddWithValue("PIC2StaffNo", licenseSite.RenewalLicense.PIC2StaffNo);
+                cmd.Parameters.AddWithValue("PIC3StaffNo", licenseSite.RenewalLicense.PIC3StaffNo);
+                cmd.Parameters.AddWithValue("Remarks", licenseSite.RenewalLicense.NewRemarks);
+
+                //License File
+                cmd.Parameters.AddWithValue("LicenseFileName", licenseSite.RenewalLicense.NewLicenseFileName);
 
                 cmd.Parameters.AddWithValue("UserName", UserName);
 
@@ -148,6 +148,7 @@ namespace BLMS.Context
                 while (dr.Read())
                 {
                     licenseSite.LicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
+                    licenseSite.OldLicenseName = dr["LicenseName"].ToString();
                     licenseSite.LicenseName = dr["LicenseName"].ToString();
                     licenseSite.CategoryID = Convert.ToInt32(dr["CategoryID"].ToString());
                     licenseSite.CategoryName = dr["CategoryName"].ToString();
@@ -186,6 +187,59 @@ namespace BLMS.Context
         }
         #endregion
 
+        #region HISTORY GRIDVIEW
+        public IEnumerable<LicenseSite> LicenseSiteGetLog(string LicenseName)
+        {
+            var counter = 1;
+
+            var licenseSiteList = new List<LicenseSite>();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseSiteGetLog", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("LicenseName", LicenseName);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var licenseSite = new LicenseSite();
+
+                    licenseSite.IndexNo = counter;
+
+                    licenseSite.HistoryLicenseID = Convert.ToInt32(dr["LicenseID"].ToString());
+                    licenseSite.HistoryLicenseName = dr["LicenseName"].ToString();
+                    licenseSite.HistoryRegistrationNo = dr["RegistrationNo"].ToString();
+                    licenseSite.HistorySerialNo = dr["SerialNo"].ToString();
+                    licenseSite.HistoryIssuedDT = dr["IssuedDT"].ToString();
+                    licenseSite.HistoryExpiredDT = dr["ExpiredDT"].ToString();
+                    licenseSite.HistoryPIC1Name = dr["PIC1Name"].ToString();
+                    licenseSite.HistoryPIC2Name = dr["PIC2Name"].ToString();
+                    licenseSite.HistoryPIC3Name = dr["PIC3Name"].ToString();
+                    licenseSite.HistoryisRequested = Convert.ToBoolean(dr["isRequested"].ToString());
+                    licenseSite.HistoryisApproved = Convert.ToBoolean(dr["isApproved"].ToString());
+                    licenseSite.HistoryisRejected = Convert.ToBoolean(dr["isRejected"].ToString());
+                    licenseSite.HistoryisRegistered = Convert.ToBoolean(dr["isRegistered"].ToString());
+                    licenseSite.HistoryisRenewed = Convert.ToBoolean(dr["isRenewed"].ToString());
+
+                    licenseSite.HistoryRenewReminderDT = Convert.ToDateTime(dr["RenewReminderDT"].ToString());
+
+                    licenseSite.HistoryhasFile = Convert.ToBoolean(dr["hasFile"].ToString());
+
+                    licenseSiteList.Add(licenseSite);
+
+                    counter++;
+                }
+
+                conn.Close();
+            }
+
+            return licenseSiteList;
+        }
+        #endregion
+
         #region CHECK DUPLICATE LICENSE SITE NAME
         public LicenseSite CheckLicenseSiteByName(string LicenseName)
         {
@@ -210,6 +264,66 @@ namespace BLMS.Context
             }
 
             return licenseSite;
+        }
+        #endregion
+
+        #region CHECK DUPLICATE LICENSE SITE FILE NAME
+        public LicenseSite CheckLicenseSiteFileByName(string LicenseFileName)
+        {
+            var licenseSite = new LicenseSite();
+
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseSiteFileCheck", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseFileName", LicenseFileName);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    licenseSite.ExistData = Convert.ToInt32(dr["ExistData"].ToString());
+                }
+
+                conn.Close();
+            }
+
+            return licenseSite;
+        }
+        #endregion
+
+        #region EDIT LICENSE SITE
+        //License Request
+        public void EditLicenseSite(LicenseSite licenseSite, string UserName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionstring))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("spLicenseSiteEdit", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("LicenseID", licenseSite.LicenseID);
+                cmd.Parameters.AddWithValue("CategoryID", licenseSite.CategoryID);
+                cmd.Parameters.AddWithValue("DivID", licenseSite.DivID);
+                cmd.Parameters.AddWithValue("UnitID", licenseSite.UnitID);
+                cmd.Parameters.AddWithValue("LicenseName", licenseSite.LicenseName);
+                cmd.Parameters.AddWithValue("RegistrationNo", licenseSite.RegistrationNo);
+                cmd.Parameters.AddWithValue("SerialNo", licenseSite.SerialNo);
+                cmd.Parameters.AddWithValue("IssuedDT", licenseSite.IssuedDT);
+                cmd.Parameters.AddWithValue("ExpiredDT", licenseSite.ExpiredDT);
+                cmd.Parameters.AddWithValue("PIC1Name", licenseSite.PIC1Name);
+                cmd.Parameters.AddWithValue("PIC2StaffNo", licenseSite.PIC2StaffNo);
+                cmd.Parameters.AddWithValue("PIC3StaffNo", licenseSite.PIC3StaffNo);
+                cmd.Parameters.AddWithValue("LicenseFileName", licenseSite.LicenseFileName);
+                cmd.Parameters.AddWithValue("Remarks", licenseSite.Remarks);
+
+                cmd.Parameters.AddWithValue("UserName", UserName);
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
         }
         #endregion
         #endregion

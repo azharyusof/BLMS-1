@@ -28,6 +28,8 @@ namespace BLMS.Models.License
         [DisplayName("License Name")]
         public string LicenseName { get; set; }
 
+        public string OldLicenseName { get; set; }
+
         [Column(TypeName = "nvarchar(250)")]
         [DisplayName("Registration No")]
         public string RegistrationNo { get; set; }
@@ -147,5 +149,62 @@ namespace BLMS.Models.License
 
         public string UserName { get; set; }
         public string UserNameStaffNo { get; set; }
+
+        //History
+        public int HistoryLicenseID { get; set; }
+
+        public string HistoryLicenseName { get; set; }
+
+        public string HistoryRegistrationNo { get; set; }
+
+        public string HistorySerialNo { get; set; }
+
+        public string HistoryPIC1Name { get; set; }
+
+        public string HistoryPIC2Name { get; set; }
+
+        public string HistoryPIC3Name { get; set; }
+
+        //Flag
+        public bool HistoryisRequested { get; set; }
+
+        public bool HistoryisApproved { get; set; }
+
+        public bool HistoryisRejected { get; set; }
+
+        public bool HistoryisRegistered { get; set; }
+
+        public bool HistoryisRenewed { get; set; }
+
+        public bool HistoryhasFile { get; set; }
+
+        public string HistoryIssuedDT { get; set; }
+
+        public string HistoryExpiredDT { get; set; }
+
+        public DateTime HistoryRenewReminderDT { get; set; }
+
+
+        //Renewal
+
+        [Column(TypeName = "nvarchar(150)")]
+        [DisplayName("Registration No")]
+        public string NewRegistrationNo { get; set; }
+
+        [Column(TypeName = "nvarchar(150)")]
+        [DisplayName("Serial No")]
+        public string NewSerialNo { get; set; }
+
+        [DisplayName("Issued Date")]
+        public string NewIssuedDT { get; set; }
+
+        [DisplayName("Expired Date")]
+        public string NewExpiredDT { get; set; }
+
+        [Column(TypeName = "nvarchar(150)")]
+        [DisplayName("Remarks")]
+        public string NewRemarks { get; set; }
+
+        public string NewLicenseFileName { get; set; }
     }
 }

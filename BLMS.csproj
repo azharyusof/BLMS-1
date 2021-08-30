@@ -5,6 +5,12 @@
     <UserSecretsId>37862330-2aee-4c75-8f55-480f5e1fefb8</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="Models\Report\" />
     <Folder Include="wwwroot\Files\" />
